@@ -1,28 +1,27 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 import os
-
-from app.database.db import AdminDB
+from app.databases.dict import DictDB
 from app.services.admin import AdminService
 from app.controllers.admin import Controller
 from app.routers.admin import AdminRouter
 
-app = FastAPI()
 
-# Global shared dependencies
-db: AdminDB | None = None
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    DB_URI = os.getenv("DB_URI", "")
+    DB_NAME = os.getenv("DB_NAME", "")
 
-@app.on_event("startup")
-async def on_startup():
-    global db
-    db = AdminDB(os.environ["MONGO_URI"], os.environ["DB_NAME"])
+    # db = AdminDB(DB_URI, DB_NAME)
+    db = DictDB("", "")
     service = AdminService(db)
     controller = Controller(service)
     admin_router = AdminRouter(controller)
     app.include_router(admin_router.router)
 
-@app.on_event("shutdown")
-async def on_shutdown():
-    global db
-    if db:
-        db.close()
+    yield
 
+    db.close()
+
+
+app = FastAPI(lifespan=lifespan)

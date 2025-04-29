@@ -3,7 +3,7 @@ from app.models.admin import AdminCreate
 from app.services.admin import AdminService
 
 
-class Controller:
+class AdminController:
     def __init__(self, service: AdminService):
         self._service = service
 
@@ -26,8 +26,10 @@ class Controller:
         Endpoint to get an admin by their ID.
         - Returns the admin details.
         """
-        admin = await self._service._db.find_one("admins", {"id": admin_id})
+        admin = await self._service.get_admin(admin_id)
         if admin is None:
             raise HTTPException(status_code=404, detail="Admin not found.")
         return admin
 
+    async def get_all_admins(self):
+        return await self._service.get_all_admins()
