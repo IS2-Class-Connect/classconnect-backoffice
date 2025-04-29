@@ -1,4 +1,4 @@
-#!/home/lminervino18/Escritorio/Facultad/IngSoft2/classconnect-backoffice/backend/venv/bin/python3
+#!/home/vinki/fiuba/tp-class/admin/backend/venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys
