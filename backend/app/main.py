@@ -21,7 +21,7 @@ async def lifespan(app: FastAPI):
     try:
         db = MongoDB(DB_URI, DB_NAME)
     except:
-        raise RuntimeError("coudn't connect to db")
+        raise RuntimeError("couldn't connect to db")
 
     service = AdminService(db)
     controller = AdminController(service)
