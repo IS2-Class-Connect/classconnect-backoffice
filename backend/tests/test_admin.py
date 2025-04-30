@@ -1,6 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
-from app.models.admin import AdminCreate, AdminOut
+from app.models.admin import AdminCreate
 from app.routers.admin import AdminRouter
 from app.controllers.admin import AdminController
 from app.services.admin import AdminService
@@ -25,7 +25,7 @@ def client(app: FastAPI):
     return TestClient(app)
 
 
-def test_create_and_get_admin(client: TestClient):
+def test_create_new_username_and_email_and_get_admin(client: TestClient):
     admin = AdminCreate(
         username="alice", email="alice@example.com", password="password"
     )
@@ -44,6 +44,10 @@ def test_create_and_get_admin(client: TestClient):
     assert getted["id"] == created["id"]
     assert getted["username"] == admin.username
 
+
+def test_get_admin_not_found(client: TestClient):
+    res = client.get("/admins/0")
+    assert res.status_code == 404
 
 def test_get_all_admins(client: TestClient):
     admins = [
@@ -84,14 +88,20 @@ def test_duplicate_username_or_email(client: TestClient):
 
 
 def test_delete_admin(client: TestClient):
-    admin = AdminCreate(username="admin", email="admin@example.com", password="password")
-    response = client.post("/admins/create", json=admin.model_dump())
-    created = response.json()
+    admin = AdminCreate(
+        username="admin", email="admin@example.com", password="password"
+    )
+    res = client.post("/admins/create", json=admin.model_dump())
+    created = res.json()
     id = created["id"]
 
-    response = client.delete(f"/admins/{id}")
-    assert response.status_code == 204
+    res = client.delete(f"/admins/{id}")
+    assert res.status_code == 204
 
-    response = client.get(f"/admins/{id}")
-    assert response.status_code == 404
-    assert response.json() == {"detail": "Admin not found"}
+    res = client.get(f"/admins/{id}")
+    assert res.status_code == 404
+    assert res.json() == {"detail": "Admin not found"}
+
+def test_delete_admin_not_found(client: TestClient):
+    res = client.delete("/admins/0")
+    assert res.status_code == 404
