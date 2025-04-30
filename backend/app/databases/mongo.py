@@ -47,4 +47,5 @@ class MongoDB(DB):
 
     @override
     async def delete(self, collection: str, id: str) -> bool:
-        return False
+        result = await self._db[collection].delete_one({"_id": id})
+        return result.deleted_count > 0
