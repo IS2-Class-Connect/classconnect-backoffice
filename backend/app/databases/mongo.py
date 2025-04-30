@@ -1,6 +1,7 @@
 from typing import Any, Optional, override
 from app.databases.db import DB
 from motor.motor_asyncio import AsyncIOMotorClient
+from bson import ObjectId
 
 
 class MongoDB(DB):
@@ -8,6 +9,12 @@ class MongoDB(DB):
         self._uri = uri
         self._client = AsyncIOMotorClient(uri)
         self._db = self._client[db_name]
+
+    def _objectid(self, id: str) -> ObjectId:
+        try:
+            return ObjectId(id)
+        except Exception as e:
+            raise ValueError("Invalid id") from e
 
     @override
     def close(self):
@@ -21,7 +28,7 @@ class MongoDB(DB):
 
     @override
     async def find_one(self, collection: str, id: str) -> Optional[dict[str, Any]]:
-        document = await self._db[collection].find_one({"_id": id})
+        document = await self._db[collection].find_one({"_id": self._objectid(id)})
         if document:
             document["id"] = str(document["_id"])
         return document
@@ -47,5 +54,5 @@ class MongoDB(DB):
 
     @override
     async def delete(self, collection: str, id: str) -> bool:
-        result = await self._db[collection].delete_one({"_id": id})
+        result = await self._db[collection].delete_one({"_id": self._objectid(id)})
         return result.deleted_count > 0

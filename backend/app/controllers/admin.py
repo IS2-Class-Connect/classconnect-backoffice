@@ -19,7 +19,10 @@ class AdminController:
             )
 
     async def get_admin(self, id: str) -> AdminOut:
-        admin = await self._service.get_admin(id)
+        try:
+            admin = await self._service.get_admin(id)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
         if admin is None:
             raise HTTPException(status_code=404, detail="Admin not found")
 
@@ -29,4 +32,7 @@ class AdminController:
         return await self._service.get_all_admins()
 
     async def delete_admin(self, id: str):
-        return await self._service.delete_admin(id)
+        try:
+            return await self._service.delete_admin(id)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))

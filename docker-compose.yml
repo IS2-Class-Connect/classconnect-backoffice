@@ -1,12 +1,27 @@
-version: '3.9'
-
 services:
-  backend:
-    build: ./backend
+  mongo:
+    image: mongo:6.0
+    container_name: mongo
+    restart: always
     ports:
-      - "8000:8000"
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
     networks:
       - monitor-net
+
+  backend:
+    container_name: backend
+    build: ./backend
+    ports:
+      - "3004:3004"
+    networks:
+      - monitor-net
+    environment:
+      - DB_URI=mongodb://mongo:27017
+      - DB_NAME=backoffice
+    depends_on:
+      - mongo
 
   prometheus:
     image: prom/prometheus
@@ -23,6 +38,9 @@ services:
       - "3000:3000"
     networks:
       - monitor-net
+
+volumes:
+  mongo_data:
 
 networks:
   monitor-net:
