@@ -27,7 +27,7 @@ class MongoDB(DB):
         return document
 
     @override
-    async def get_all(self, collection: str) -> list[Any]:
+    async def get_all(self, collection: str) -> list[dict[str, Any]]:
         users = []
         cursor = self._db[collection].find()
         async for doc in cursor:

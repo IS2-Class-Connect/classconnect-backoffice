@@ -1,6 +1,5 @@
 import abc
 from typing import Any, Optional
-from uuid import UUID
 
 class DB(abc.ABC):
     @abc.abstractmethod
@@ -12,11 +11,11 @@ class DB(abc.ABC):
         pass
 
     @abc.abstractmethod
-    async def find_one(self, collection: str, id: UUID) -> Optional[dict[str, Any]]:
+    async def find_one(self, collection: str, id: str) -> Optional[dict[str, Any]]:
         pass
 
     @abc.abstractmethod
-    async def get_all(self, collection: str) -> list[Any]:
+    async def get_all(self, collection: str) -> list[dict[str, Any]]:
         pass
 
     @abc.abstractmethod
