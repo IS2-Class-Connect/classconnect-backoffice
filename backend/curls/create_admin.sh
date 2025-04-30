@@ -6,7 +6,7 @@ if [ $# -ne 1 ]; then
 fi
 
 curl -X 'POST' \
-  'http://localhost:3004/admins/register' \
+  'http://localhost:3004/admins/create' \
   -H 'Content-Type: application/json' \
   -d "{
     \"username\": \"$1\",

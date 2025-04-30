@@ -15,3 +15,6 @@ uvicorn==0.34.2
 motor
 email-validator
 bcrypt
+pytest
+pytest-asyncio
+httpx

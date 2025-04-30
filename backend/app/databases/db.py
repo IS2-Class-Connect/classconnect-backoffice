@@ -22,3 +22,6 @@ class DB(abc.ABC):
     async def exists_with_username_email(self, collection: str, username: str, email: str) -> bool:
         pass
 
+    @abc.abstractmethod
+    async def delete(self, collection: str, id: str) -> bool:
+        pass

@@ -3,8 +3,9 @@ from app.databases.db import DB
 from collections import defaultdict
 from uuid import uuid4
 
+
 class DictDB(DB):
-    def __init__(self, uri: str, db_name: str):
+    def __init__(self):
         self._db = defaultdict(dict)
 
     @override
@@ -27,7 +28,9 @@ class DictDB(DB):
         return list(self._db[collection].values())
 
     @override
-    async def exists_with_username_email(self, collection: str, username: str, email: str) -> bool:
+    async def exists_with_username_email(
+        self, collection: str, username: str, email: str
+    ) -> bool:
         for doc in self._db[collection].values():
             if doc.get("username") == username:
                 return True
@@ -35,4 +38,6 @@ class DictDB(DB):
                 return True
         return False
 
-
+    @override
+    async def delete(self, collection: str, id: str) -> bool:
+        return self._db[collection].pop(id, None) is not None

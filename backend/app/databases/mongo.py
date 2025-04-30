@@ -42,4 +42,9 @@ class MongoDB(DB):
         document = await self._db[collection].find_one(
             {"$or": [{"username": username}, {"email": email}]}
         )
+
         return document is not None
+
+    @override
+    async def delete(self, collection: str, id: str) -> bool:
+        return False
