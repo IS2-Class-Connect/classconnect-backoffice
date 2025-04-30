@@ -26,7 +26,7 @@ class AdminController:
             raise HTTPException(status_code=400, detail=str(e))
         except Exception:
             raise HTTPException(
-                status_code=500, detail="Failed to create admin due to server error"
+                status_code=500, detail="Failed to retrieve admin due to server error"
             )
         if admin is None:
             raise HTTPException(status_code=404, detail="Admin not found")
