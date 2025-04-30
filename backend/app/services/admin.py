@@ -1,5 +1,6 @@
 from typing import Optional
 from app.databases.db import DB
+from app.exceptions.username_or_email import UsernameEmailInUser
 from app.models.admin import AdminCreate, AdminOut
 import bcrypt
 
@@ -19,7 +20,7 @@ class AdminService:
             self._admin_coll, admin_data.username, admin_data.email
         )
         if existing:
-            raise ValueError("Username or email already exists")
+            raise UsernameEmailInUser()
 
         hashed_password = self.hash_password(admin_data.password)
         admin_dict = admin_data.model_dump()

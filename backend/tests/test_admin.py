@@ -25,15 +25,15 @@ def client(app: FastAPI):
     return TestClient(app)
 
 
-def test_create_new_username_and_email_and_get_admin(client: TestClient):
+def test_create_get_admin(client: TestClient):
     admin = AdminCreate(
         username="alice", email="alice@example.com", password="password"
     )
 
-    res = client.post("/admins/create", json=admin.model_dump())
+    res = client.post("/admins", json=admin.model_dump())
     created = res.json()
 
-    assert res.status_code == 200
+    assert res.status_code == 201
     assert created["username"] == admin.username
     assert created["email"] == admin.email
 
@@ -56,7 +56,7 @@ def test_get_all_admins(client: TestClient):
     ]
 
     for admin in admins:
-        client.post("/admins/create", json=admin.model_dump())
+        client.post("/admins", json=admin.model_dump())
 
     res = client.get("/admins")
     getted = res.json()
@@ -68,22 +68,22 @@ def test_get_all_admins(client: TestClient):
 
 def test_duplicate_username_or_email(client: TestClient):
     admin = AdminCreate(username="dave", email="dave@example.com", password="password")
-    client.post("/admins/create", json=admin.model_dump())
+    client.post("/admins", json=admin.model_dump())
 
     same_username = AdminCreate(
         username="dave", email="different@example.com", password="password"
     )
 
-    res = client.post("/admins/create", json=same_username.model_dump())
-    assert res.status_code == 400
+    res = client.post("/admins", json=same_username.model_dump())
+    assert res.status_code == 409
     assert res.json() == {"detail": "Username or email already exists"}
 
     same_email = AdminCreate(
         username="different", email="dave@example.com", password="password"
     )
 
-    res = client.post("/admins/create", json=same_email.model_dump())
-    assert res.status_code == 400
+    res = client.post("/admins", json=same_email.model_dump())
+    assert res.status_code == 409
     assert res.json() == {"detail": "Username or email already exists"}
 
 
@@ -91,7 +91,7 @@ def test_delete_admin(client: TestClient):
     admin = AdminCreate(
         username="admin", email="admin@example.com", password="password"
     )
-    res = client.post("/admins/create", json=admin.model_dump())
+    res = client.post("/admins", json=admin.model_dump())
     created = res.json()
     id = created["id"]
 
