@@ -138,3 +138,4 @@ dist
 # python
 .pytest_cache/
 __pycache__/
+venv/
