@@ -1,25 +1,40 @@
-from app.database.db import AdminDB
-from app.models.admin import AdminCreate
-import hashlib
+from typing import Optional
+from app.databases.db import DB
+from app.exceptions.username_or_email import UsernameEmailInUser
+from app.models.admin import AdminCreate, AdminOut
+import bcrypt
+
 
 class AdminService:
-    def __init__(self, db: AdminDB):
+    def __init__(self, db: DB):
         self._db = db
-        self._collection = "admins"
+        self._admin_coll = "admins"
 
     def hash_password(self, password: str) -> str:
-        return hashlib.sha256(password.encode()).hexdigest()
+        salt = bcrypt.gensalt()
+        hashed = bcrypt.hashpw(password.encode(), salt)
+        return hashed.decode()
 
-    async def create_admin(self, admin_data: AdminCreate) -> dict:
-        existing = await self._db.find_one(self._collection, {
-            "$or": [{"username": admin_data.username}, {"email": admin_data.email}]
-        })
+    async def create_admin(self, admin_data: AdminCreate) -> AdminOut:
+        existing = await self._db.exists_with_username_email(
+            self._admin_coll, admin_data.username, admin_data.email
+        )
         if existing:
-            raise ValueError("Username or email already exists")
+            raise UsernameEmailInUser()
 
         hashed_password = self.hash_password(admin_data.password)
         admin_dict = admin_data.model_dump()
         admin_dict["password"] = hashed_password
 
-        return await self._db.create(self._collection, admin_dict)
+        admin = await self._db.create(self._admin_coll, admin_dict)
+        return AdminOut(**admin)
 
+    async def get_admin(self, id: str) -> Optional[AdminOut]:
+        admin = await self._db.find_one(self._admin_coll, id)
+        return AdminOut(**admin) if admin else None
+
+    async def get_all_admins(self) -> list[AdminOut]:
+        return [AdminOut(**admin) for admin in await self._db.get_all(self._admin_coll)]
+
+    async def delete_admin(self, id: str):
+        return await self._db.delete(self._admin_coll, id)

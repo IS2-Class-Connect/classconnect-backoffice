@@ -1,0 +1,158 @@
+openapi: 3.0.0
+info:
+  title: Admins API
+  description: API to manage admin data.
+  version: 1.0.0
+
+paths:
+  /admins:
+    post:
+      summary: Create a new admin.
+      description: Creates a new admin with the provided details.
+      operationId: create_admin
+      requestBody:
+        description: Admin details to create a new admin.
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminCreate'
+
+      responses:
+        '201':
+          description: Admin created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminOut'
+        '409':
+          description: Username or email already in use.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ERROR'
+        '422':
+          description: Incomplete admin payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ERROR'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ERROR'
+
+    get:
+      summary: Get all admins.
+      description: Returns a list of all the admins and their details.
+      operationId: get_all_admins
+
+      responses:
+        '202':
+          description: List of admin details.
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminOut'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ERROR'
+
+  /admins/{id}:
+    get:
+      summary: Get user by id.
+      description: Retrieves user information by id.
+      operationId: get_admin
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: Id of the admin to retrieve.
+          schema:
+            type: ObjectId
+            example: "681293f60d3eebd21ae7dad4"
+      responses:
+        '200':
+          description: Admin found successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/componenets/schemas/AdminOut'
+        '404':
+          description: Admin not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ERROR'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ERROR'
+
+    delete:
+      summary: Delete admin by id.
+      description: Delete admin information by it's id.
+      operationId: delete_admin
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: Id of the admin to delete.
+          schema:
+            type: ObjectId
+            example: "681293f60d3eebd21ae7dad4"
+      responses:
+        '204':
+          description: Admin deleted successfully.
+        '404':
+          description: Admin not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ERROR'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ERROR'
+
+components:
+  schemas:
+    AdminCreate:
+      type: object
+      properties:
+        username:
+          type: string
+          example: "Username"
+        email:
+          type: string
+          format: email
+          example: "admin@example.com"
+        password:
+          type: string
+          example: "832ikjsa8rqtlkqf"
+    AdminOut:
+      type: object
+      properties:
+        id:
+          type: ObjectId
+          example: "681293f60d3eebd21ae7dad4"
+        username:
+          type: string
+          example: "Username"
+        password:
+          type: string
+          example: "poqdsf?98y132poiahd"
+    ERROR:
+      type: object
+      properties:
+        details:
+          type: string
+

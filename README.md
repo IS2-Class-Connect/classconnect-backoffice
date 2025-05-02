@@ -39,6 +39,41 @@
 - Prometheus Client for metrics
 - Uvicorn as ASGI server
 
+#### Endpoints
+
+Here are some curl examples for every endpoint implemented.
+
+To create a new admin use `POST /admins`
+```sh
+curl -X 'POST' \
+  'http://localhost:3004/admins' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "username": "username",
+    "email": "mail@example.com",
+    "password": "securepassword"
+  }'
+```
+
+To get a list of all the admins in the system use `GET /admins`
+```sh
+curl -X GET "http://localhost:3004/admins" \
+  -H 'Content-Type: application/json'
+```
+
+To get a certain admin use `GET /admins/:id`
+```sh
+curl -X GET "http://localhost:3004/admins/{id}" \
+  -H 'Content-Type: application/json'
+```
+
+To delete a certain admin use `DELETE /admins/:id`
+```sh
+curl -X DELETE \
+  "http://localhost:3004/admins/{id}" \
+  -H 'Content-Type: application/json'
+```
+
 ### DevOps
 - Docker & Docker Compose
 - Prometheus

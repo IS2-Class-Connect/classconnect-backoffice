@@ -1,33 +1,54 @@
 from fastapi import HTTPException
-from app.models.admin import AdminCreate
+from app.exceptions.username_or_email import UsernameEmailInUser
+from app.models.admin import AdminCreate, AdminOut
 from app.services.admin import AdminService
 
 
-class Controller:
+class AdminController:
     def __init__(self, service: AdminService):
         self._service = service
 
-    async def register_admin(self, admin: AdminCreate):
-        """
-        Endpoint to register a new admin.
-        - It accepts admin registration data and checks if the username or email already exists.
-        - If registration is successful, the new admin data (with a hashed password) is returned.
-        """
+    async def create_admin(self, admin: AdminCreate) -> AdminOut:
         try:
             created_admin = await self._service.create_admin(admin)
             return created_admin
-        except ValueError as ve:
-            raise HTTPException(status_code=400, detail=str(ve))
+        except UsernameEmailInUser as e:
+            raise HTTPException(status_code=409, detail=str(e))
         except Exception:
-            raise HTTPException(status_code=500, detail="Failed to create admin due to server error.")
+            raise HTTPException(
+                status_code=500, detail="Failed to create admin due to server error"
+            )
 
-    async def get_admin(self, admin_id: str):
-        """
-        Endpoint to get an admin by their ID.
-        - Returns the admin details.
-        """
-        admin = await self._service._db.find_one("admins", {"id": admin_id})
+    async def get_admin(self, id: str) -> AdminOut:
+        try:
+            admin = await self._service.get_admin(id)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        except Exception:
+            raise HTTPException(
+                status_code=500, detail="Failed to retrieve admin due to server error"
+            )
         if admin is None:
-            raise HTTPException(status_code=404, detail="Admin not found.")
+            raise HTTPException(status_code=404, detail="Admin not found")
+
         return admin
 
+    async def get_all_admins(self) -> list[AdminOut]:
+        try:
+            return await self._service.get_all_admins()
+        except Exception:
+            raise HTTPException(
+                status_code=500, detail="Failed to create admin due to server error"
+            )
+
+    async def delete_admin(self, id: str):
+        try:
+            found = await self._service.delete_admin(id)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        except Exception:
+            raise HTTPException(
+                status_code=500, detail="Failed to create admin due to server error"
+            )
+        if not found:
+            raise HTTPException(status_code=404, detail="Admin not found")
