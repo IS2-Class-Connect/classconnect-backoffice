@@ -45,9 +45,39 @@ def test_create_get_admin(client: TestClient):
     assert getted["username"] == admin.username
 
 
+def test_create_missing_fields(client: TestClient):
+    # No username
+    payload = {
+        "email": "alice@example.com",
+        "password": "12345678",
+    }
+
+    res = client.post("/admins", json=payload)
+    assert res.status_code == 422
+
+    # No email
+    payload = {
+        "username": "alice",
+        "password": "12345678",
+    }
+
+    res = client.post("/admins", json=payload)
+    assert res.status_code == 422
+
+    # No password
+    payload = {
+        "username": "alice",
+        "email": "alice@example.com",
+    }
+
+    res = client.post("/admins", json=payload)
+    assert res.status_code == 422
+
+
 def test_get_admin_not_found(client: TestClient):
     res = client.get("/admins/0")
     assert res.status_code == 404
+
 
 def test_get_all_admins(client: TestClient):
     admins = [
@@ -101,6 +131,7 @@ def test_delete_admin(client: TestClient):
     res = client.get(f"/admins/{id}")
     assert res.status_code == 404
     assert res.json() == {"detail": "Admin not found"}
+
 
 def test_delete_admin_not_found(client: TestClient):
     res = client.delete("/admins/0")
