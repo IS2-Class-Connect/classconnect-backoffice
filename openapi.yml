@@ -29,6 +29,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ERROR'
+        '422':
+          description: Incomplete admin payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ERROR'
         '500':
           description: Internal server error.
           content:
