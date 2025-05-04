@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 from app.exceptions.username_or_email import UsernameEmailInUser
-from app.models.admin import AdminCreate, AdminOut
+from app.models.admin import AdminCreate, AdminOut,AdminLogin,Token
 from app.services.admin import AdminService
 
 
@@ -52,3 +52,12 @@ class AdminController:
             )
         if not found:
             raise HTTPException(status_code=404, detail="Admin not found")
+
+    async def login(self, login_data: AdminLogin) -> Token:
+        try:
+            return await self._service.login_admin(login_data)
+        except HTTPException as e:
+            raise e
+        except Exception:
+            raise HTTPException(status_code=500, detail="Server error during login")
+

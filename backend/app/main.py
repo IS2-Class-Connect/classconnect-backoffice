@@ -5,9 +5,6 @@ from app.databases.mongo import MongoDB
 from app.services.admin import AdminService
 from app.controllers.admin import AdminController
 from app.routers.admin import AdminRouter
-from app.routers.auth import AuthRouter 
-from app.services.auth import AuthService
-from app.controllers.auth import AuthController
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -29,10 +26,7 @@ async def lifespan(app: FastAPI):
     controller = AdminController(service)
     admin_router = AdminRouter(controller)
     app.include_router(admin_router.router)
-    auth_service = AuthService(db)
-    auth_controller = AuthController(auth_service)
-    auth_router = AuthRouter(auth_controller)
-    app.include_router(auth_router.router)
+
     yield
 
     db.close()

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import api from '../api/axios';
-import '../styles/LoginForm.css'; // Importamos el archivo CSS
+import '../styles/LoginForm.css'; 
 
 function AdminLoginForm() {
   const [username, setUsername] = useState('');
@@ -11,7 +11,10 @@ function AdminLoginForm() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const res = await api.post('/auth/login', { username, password });
+      const res = await api.post("/admins/login", {
+        email: username,
+        password: password,
+      });
       alert('Login exitoso');
       localStorage.setItem('token', res.data.access_token);
     } catch (err) {
