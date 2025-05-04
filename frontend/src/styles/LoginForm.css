@@ -75,4 +75,10 @@ body {
     background-color: #c5c7d6;
     cursor: not-allowed;
   }
+  .error-message {
+    color: red;
+    margin-top: 10px;
+    font-size: 0.9rem;
+  }
+  
   

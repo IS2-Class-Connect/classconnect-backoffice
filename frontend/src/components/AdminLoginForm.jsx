@@ -7,11 +7,13 @@ function AdminLoginForm() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setErrorMessage(''); // Limpiar mensaje anterior
     try {
       const res = await api.post("/admins/login", {
         email: username,
@@ -21,7 +23,7 @@ function AdminLoginForm() {
       navigate('/home');
     } catch (err) {
       console.error(err);
-      alert('Login fallido');
+      setErrorMessage('Login failed: Invalid email or password');
     }
     setIsLoading(false);
   };
@@ -47,8 +49,9 @@ function AdminLoginForm() {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
+          {errorMessage && <div className="error-message">{errorMessage}</div>}
           <button type="submit" className="login-button" disabled={isLoading}>
-            {isLoading ? 'Iniciando...' : 'Iniciar Sesión'}
+            {isLoading ? 'Logging in...' : 'Login'}
           </button>
         </form>
       </div>
