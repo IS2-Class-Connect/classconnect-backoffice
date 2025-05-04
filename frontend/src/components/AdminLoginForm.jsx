@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import api from '../api/axios';
 import '../styles/LoginForm.css'; 
+import { useNavigate } from 'react-router-dom';
 
 function AdminLoginForm() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -15,8 +17,8 @@ function AdminLoginForm() {
         email: username,
         password: password,
       });
-      alert('Login exitoso');
       localStorage.setItem('token', res.data.access_token);
+      navigate('/home');
     } catch (err) {
       console.error(err);
       alert('Login fallido');
