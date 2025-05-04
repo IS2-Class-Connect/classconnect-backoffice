@@ -11,11 +11,11 @@ paths:
       description: Creates a new admin with the provided details.
       operationId: create_admin
       requestBody:
-        description: Admin details to create a new admin.
+        required: true
+        content:
           application/json:
             schema:
               $ref: '#/components/schemas/AdminCreate'
-
       responses:
         '201':
           description: Admin created successfully.
@@ -46,10 +46,10 @@ paths:
       summary: Get all admins.
       description: Returns a list of all the admins and their details.
       operationId: get_all_admins
-
       responses:
         '202':
           description: List of admin details.
+          content:
             application/json:
               schema:
                 type: array
@@ -73,7 +73,7 @@ paths:
           required: true
           description: Id of the admin to retrieve.
           schema:
-            type: ObjectId
+            type: string
             example: "681293f60d3eebd21ae7dad4"
       responses:
         '200':
@@ -81,7 +81,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/componenets/schemas/AdminOut'
+                $ref: '#/components/schemas/AdminOut'
         '404':
           description: Admin not found.
           content:
@@ -97,7 +97,7 @@ paths:
 
     delete:
       summary: Delete admin by id.
-      description: Delete admin information by it's id.
+      description: Delete admin information by its id.
       operationId: delete_admin
       parameters:
         - in: path
@@ -105,7 +105,7 @@ paths:
           required: true
           description: Id of the admin to delete.
           schema:
-            type: ObjectId
+            type: string
             example: "681293f60d3eebd21ae7dad4"
       responses:
         '204':
@@ -123,10 +123,68 @@ paths:
               schema:
                 $ref: '#/components/schemas/ERROR'
 
+  /admins/login:
+    post:
+      summary: Admin login
+      description: Authenticates an admin and returns a JWT access token.
+      operationId: login_admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: admin123@example.com
+                password:
+                  type: string
+                  example: securepassword
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                    example: >-
+                      eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2ODE2ODg1OGI4NDE4MDRhMWEwYTE1NzUiLCJlbWFpbCI6ImFkbWluMTIzQGV4YW1wbGUuY29tIiwiZXhwIjoxNzQ2MzcyNjE1fQ.HVajTCJ0WHDOpjaZ7UmQd1gStcIo-8H3Pc3iVeOp9EY
+                  token_type:
+                    type: string
+                    example: bearer
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ERROR'
+              example:
+                detail: Invalid credentials
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ERROR'
+              example:
+                detail: Server error during login
+
 components:
   schemas:
     AdminCreate:
       type: object
+      required:
+        - username
+        - email
+        - password
       properties:
         username:
           type: string
@@ -138,11 +196,12 @@ components:
         password:
           type: string
           example: "832ikjsa8rqtlkqf"
+
     AdminOut:
       type: object
       properties:
         id:
-          type: ObjectId
+          type: string
           example: "681293f60d3eebd21ae7dad4"
         username:
           type: string
@@ -150,9 +209,9 @@ components:
         password:
           type: string
           example: "poqdsf?98y132poiahd"
+
     ERROR:
       type: object
       properties:
-        details:
+        detail:
           type: string
-

@@ -18,3 +18,4 @@ bcrypt
 pytest
 pytest-asyncio
 httpx
+PyJWT

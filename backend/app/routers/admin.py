@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from app.controllers.admin import AdminController
-from app.models.admin import AdminCreate, AdminOut
+from app.models.admin import AdminCreate, AdminOut,AdminLogin,Token
 
 
 class AdminRouter:
@@ -12,6 +12,10 @@ class AdminRouter:
         self.router.get("/{id}", response_model=AdminOut)(self.get_admin)
         self.router.get("", response_model=list[AdminOut])(self.get_all_admins)
         self.router.delete("/{id}", status_code=204)(self.delete_admin)
+        self.router.post("/login", response_model=Token)(self.login)
+
+    async def login(self, login_data: AdminLogin):
+        return await self._controller.login(login_data)
 
     async def create_admin(self, admin: AdminCreate):
         return await self._controller.create_admin(admin)

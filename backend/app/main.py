@@ -6,7 +6,6 @@ from app.services.admin import AdminService
 from app.controllers.admin import AdminController
 from app.routers.admin import AdminRouter
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     

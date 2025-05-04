@@ -74,6 +74,17 @@ curl -X DELETE \
   -H 'Content-Type: application/json'
 ```
 
+To login admins: 
+```sh
+curl --location 'http://localhost:3004/admins/login' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "email": "admin123@example.com",
+  "password": "securepassword"
+}
+'
+```
+
 ### DevOps
 - Docker & Docker Compose
 - Prometheus
