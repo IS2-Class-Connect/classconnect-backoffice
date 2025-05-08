@@ -25,3 +25,7 @@ class DB(abc.ABC):
     @abc.abstractmethod
     async def delete(self, collection: str, id: str) -> bool:
         pass
+
+    @abc.abstractmethod
+    async def find_one_by_filter(self, collection: str, filter: dict[str, Any]) -> Optional[dict[str, Any]]:
+        pass
