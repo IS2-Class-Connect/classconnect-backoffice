@@ -56,3 +56,10 @@ class MongoDB(DB):
     async def delete(self, collection: str, id: str) -> bool:
         result = await self._db[collection].delete_one({"_id": self._objectid(id)})
         return result.deleted_count > 0
+
+    @override
+    async def find_one_by_filter(self, collection: str, filter: dict[str, Any]) -> Optional[dict[str, Any]]:
+        document = await self._db[collection].find_one(filter)
+        if document:
+            document["id"] = str(document["_id"])
+        return document

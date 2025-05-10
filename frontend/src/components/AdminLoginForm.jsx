@@ -4,7 +4,7 @@ import '../styles/LoginForm.css';
 import { useNavigate } from 'react-router-dom';
 
 function AdminLoginForm() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -16,7 +16,7 @@ function AdminLoginForm() {
     setErrorMessage(''); // Limpiar mensaje anterior
     try {
       const res = await api.post("/admins/login", {
-        email: username,
+        email: email,
         password: password,
       });
       localStorage.setItem('token', res.data.access_token);
@@ -36,9 +36,9 @@ function AdminLoginForm() {
           <input
             type="text"
             className="login-input"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
           />
           <input

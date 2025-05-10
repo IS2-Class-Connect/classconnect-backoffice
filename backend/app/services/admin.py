@@ -58,7 +58,7 @@ class AdminService:
         return jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
 
     async def login_admin(self, login_data: AdminLogin) -> Token:
-        admin = await self._db._db[self._admin_coll].find_one({"email": login_data.email})
+        admin = await self._db.find_one_by_filter(self._admin_coll, {"email": login_data.email})
         if not admin:
             raise HTTPException(status_code=401, detail="Invalid credentials")
         
