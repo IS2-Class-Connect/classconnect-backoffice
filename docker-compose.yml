@@ -3,21 +3,25 @@ services:
     image: mongo:6.0
     container_name: mongo
     restart: always
+    networks:
+      - my-network
     ports:
-      - "27017:27017"
+      - 27017:27017
     volumes:
       - mongo_data:/data/db
 
   admins:
     container_name: admins
     build: ./backend
+    networks:
+      - my-network
     ports:
       - 3004:3004
     environment:
       - DB_URI=mongodb://mongo:27017
       - DB_NAME=backoffice
       - ADMIN_TOKEN=admin-token
-      - GATEWAY_URL=http://localhost:3000
+      - GATEWAY_URL=http://gateway:3000
     depends_on:
       - mongo
 
@@ -36,3 +40,8 @@ services:
 
 volumes:
   mongo_data:
+
+networks:
+  my-network:
+    name: classconnect_net
+    external: true
