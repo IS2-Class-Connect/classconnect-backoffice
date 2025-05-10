@@ -1,14 +1,14 @@
 from typing import Optional
 from app.databases.db import DB
 from app.exceptions.username_or_email import UsernameEmailInUser
-from app.models.admin import AdminCreate, AdminOut,AdminLogin, Token, UserOut
+from app.models.admin import AdminCreate, AdminOut, AdminLogin, Token, UserOut
 import bcrypt
 from fastapi import HTTPException
 from datetime import datetime, timedelta
-import jwt 
+import jwt
 import requests
 
-SECRET_KEY = "secret" 
+SECRET_KEY = "secret"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
@@ -58,13 +58,15 @@ class AdminService:
         return jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
 
     async def login_admin(self, login_data: AdminLogin) -> Token:
-        admin = await self._db.find_one_by_filter(self._admin_coll, {"email": login_data.email})
+        admin = await self._db.find_one_by_filter(
+            self._admin_coll, {"email": login_data.email}
+        )
         if not admin:
             raise HTTPException(status_code=401, detail="Invalid credentials")
-        
+
         if not self.verify_password(login_data.password, admin["password"]):
             raise HTTPException(status_code=401, detail="Invalid credentials")
-        
+
         token = self.create_token({"sub": str(admin["_id"]), "email": admin["email"]})
         return Token(access_token=token)
 
@@ -76,8 +78,8 @@ class AdminService:
             res = requests.get(url, headers=headers, timeout=5)
             res.raise_for_status()
             return [UserOut(**user) for user in res.json()]
-        except requests.exceptions.RequestException:
+        except requests.exceptions.RequestException as e:
+            print(e)
             raise HTTPException(
-                status_code=502,
-                detail="Failed to connect to users service"
+                status_code=502, detail="Failed to connect to users service"
             )

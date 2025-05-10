@@ -11,11 +11,11 @@ class AdminRouter:
         self.router.post("", response_model=AdminOut, status_code=201)(
             self.create_admin
         )
+        self.router.get("/users", response_model=list[UserOut])(self.get_all_users)
         self.router.get("/{id}", response_model=AdminOut)(self.get_admin)
         self.router.get("", response_model=list[AdminOut])(self.get_all_admins)
         self.router.delete("/{id}", status_code=204)(self.delete_admin)
         self.router.post("/login", response_model=Token)(self.login)
-        self.router.get("/users", response_model=list[UserOut])(self.get_all_users)
 
     async def login(self, login_data: AdminLogin):
         return await self._controller.login(login_data)
