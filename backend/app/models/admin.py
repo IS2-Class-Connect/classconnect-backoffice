@@ -6,6 +6,11 @@ class AdminCreate(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=6)
 
+class UserOut(BaseModel):
+    email: EmailStr
+    name: str
+    urlProfilePhoto: str
+    description: str
 
 class AdminOut(BaseModel):
     id: str
