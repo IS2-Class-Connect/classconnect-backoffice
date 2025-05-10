@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 from app.exceptions.username_or_email import UsernameEmailInUser
-from app.models.admin import AdminCreate, AdminOut,AdminLogin,Token
+from app.models.admin import AdminCreate, AdminOut, AdminLogin, Token, UserOut
 from app.services.admin import AdminService
 
 
@@ -61,3 +61,12 @@ class AdminController:
         except Exception:
             raise HTTPException(status_code=500, detail="Server error during login")
 
+    async def get_all_users(self) -> list[UserOut]:
+        try:
+            return await self._service.get_all_users()
+        except HTTPException:
+            raise
+        except Exception:
+            raise HTTPException(
+                status_code=500, detail="Server error during get all users"
+            )

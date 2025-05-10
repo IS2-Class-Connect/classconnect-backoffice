@@ -20,6 +20,8 @@ services:
     environment:
       - DB_URI=mongodb://mongo:27017
       - DB_NAME=backoffice
+      - ADMIN_TOKEN=admin-token
+      - GATEWAY_URL=localhost:3000
     depends_on:
       - mongo
 
