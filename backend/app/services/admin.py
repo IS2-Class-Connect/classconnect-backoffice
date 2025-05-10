@@ -79,7 +79,7 @@ class AdminService:
             res.raise_for_status()
             return [UserOut(**user) for user in res.json()]
         except requests.exceptions.RequestException as e:
-            print(e)
+            logger.error(f"Error while connecting to users service: {e}")
             raise HTTPException(
                 status_code=502, detail="Failed to connect to users service"
             )
