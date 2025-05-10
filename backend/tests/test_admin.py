@@ -11,7 +11,7 @@ from fastapi import FastAPI
 @pytest.fixture
 def app():
     db = DictDB()
-    service = AdminService(db)
+    service = AdminService(db, "testing-token", "testing-url")
     controller = AdminController(service)
     router = AdminRouter(controller)
 
