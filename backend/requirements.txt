@@ -20,3 +20,5 @@ pytest-asyncio
 httpx
 PyJWT
 requests
+coverage
+pytest-cov
