@@ -1,7 +1,8 @@
 from typing import Optional
 from app.databases.db import DB
 from app.exceptions.username_or_email import UsernameEmailInUser
-from app.models.admin import AdminCreate, AdminOut, AdminLogin, Token, UserOut
+from app.models.admin import AdminCreate, AdminOut, AdminLogin, Token
+from app.models.users import UserOut
 import bcrypt
 from fastapi import HTTPException
 from datetime import datetime, timedelta
@@ -35,6 +36,7 @@ class AdminService:
         hashed_password = self.hash_password(admin_data.password)
         admin_dict = admin_data.model_dump()
         admin_dict["password"] = hashed_password
+        admin_dict["registration_date"] = datetime.utcnow().isoformat() + "Z"
 
         admin = await self._db.create(self._admin_coll, admin_dict)
         return AdminOut(**admin)
@@ -79,7 +81,6 @@ class AdminService:
             res.raise_for_status()
             return [UserOut(**user) for user in res.json()]
         except requests.exceptions.RequestException as e:
-            logger.error(f"Error while connecting to users service: {e}")
             raise HTTPException(
                 status_code=502, detail="Failed to connect to users service"
             )

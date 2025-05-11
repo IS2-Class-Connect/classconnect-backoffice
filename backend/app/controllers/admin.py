@@ -1,6 +1,7 @@
 from fastapi import HTTPException
 from app.exceptions.username_or_email import UsernameEmailInUser
-from app.models.admin import AdminCreate, AdminOut, AdminLogin, Token, UserOut
+from app.models.admin import AdminCreate, AdminOut, AdminLogin, Token
+from app.models.users import UserOut
 from app.services.admin import AdminService
 
 
@@ -11,6 +12,7 @@ class AdminController:
     async def create_admin(self, admin: AdminCreate) -> AdminOut:
         try:
             created_admin = await self._service.create_admin(admin)
+            print(created_admin)
             return created_admin
         except UsernameEmailInUser as e:
             raise HTTPException(status_code=409, detail=str(e))
@@ -38,7 +40,7 @@ class AdminController:
             return await self._service.get_all_admins()
         except Exception:
             raise HTTPException(
-                status_code=500, detail="Failed to create admin due to server error"
+                status_code=500, detail="Failed to get all admins due to server error"
             )
 
     async def delete_admin(self, id: str):
@@ -48,7 +50,7 @@ class AdminController:
             raise HTTPException(status_code=400, detail=str(e))
         except Exception:
             raise HTTPException(
-                status_code=500, detail="Failed to create admin due to server error"
+                status_code=500, detail="Failed to delete admin due to server error"
             )
         if not found:
             raise HTTPException(status_code=404, detail="Admin not found")
