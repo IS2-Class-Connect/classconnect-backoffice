@@ -9,8 +9,8 @@ const UserList = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const usersResponse = await api.get('/admin-backend/users');
-        const adminsResponse = await api.get('admins');
+        const usersResponse = await api.get('/admins/users');
+        const adminsResponse = await api.get('/admins');
         setAdmins(adminsResponse.data);
         setUsers(usersResponse.data);
       } catch (error) {
@@ -22,7 +22,7 @@ const UserList = () => {
   }, []);
   const updateUserLockStatus = async (uuid, locked) => {
     try {
-      await api.patch(`/admin-backend/users/${uuid}/lock-status`, { locked });
+      await api.patch(`/admins/users/${uuid}/lock-status`, { locked });
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
           user.uuid === uuid ? { ...user, accountLockedByAdmins: locked } : user
