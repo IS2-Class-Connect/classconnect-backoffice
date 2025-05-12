@@ -20,32 +20,19 @@ const UserList = () => {
 
     fetchData();
   }, []);
-
-  const blockUser = async (uuid) => {
+  const updateUserLockStatus = async (uuid, locked) => {
     try {
-      await api.post(`/admin-backend/users/${uuid}/block`);
+      await api.patch(`/admin-backend/users/${uuid}/lock-status`, { locked });
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
-          user.uuid === uuid ? { ...user, accountBlockedByAdmins: true } : user
+          user.uuid === uuid ? { ...user, accountLockedByAdmins: locked } : user
         )
       );
     } catch (error) {
-      console.error('Failed to block user:', error);
+      console.error(`Failed to ${locked ? 'block' : 'unblock'} user:`, error);
     }
   };
 
-  const unblockUser = async (uuid) => {
-    try {
-      await api.post(`/admin-backend/users/${uuid}/unblock`);
-      setUsers((prevUsers) =>
-        prevUsers.map((user) =>
-          user.uuid === uuid ? { ...user, accountBlockedByAdmins: false } : user
-        )
-      );
-    } catch (error) {
-      console.error('Failed to unblock user:', error);
-    }
-  };
 
   const formatActiveness = (isBlocked) => {
     return isBlocked ? 'Blocked' : 'Active';
@@ -77,13 +64,13 @@ const UserList = () => {
           {users.map((user) => (
             <tr key={user.uuid}>
               <td>{user.name}</td>
-              <td>{formatActiveness(user.accountBlockedByAdmins)}</td>
+              <td>{formatActiveness(user.accountLockedByAdmins)}</td>
               <td>{formatDate(user.createdAt)}</td>
               <td>
-                {user.accountBlockedByAdmins ? (
-                  <button onClick={() => unblockUser(user.uuid)}>Unblock</button>
+                {user.accountLockedByAdmins ? (
+                  <button onClick={() => updateUserLockStatus(user.uuid,false)}>Unblock</button>
                 ) : (
-                  <button onClick={() => blockUser(user.uuid)}>Block</button>
+                  <button onClick={() => updateUserLockStatus(user.uuid,true)}>Block</button>
                 )}
               </td>
             </tr>
