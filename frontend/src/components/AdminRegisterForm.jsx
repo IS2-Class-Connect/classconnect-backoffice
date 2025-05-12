@@ -21,7 +21,7 @@ function AdminRegisterForm() {
         email,
         password,
       });
-      navigate('/');
+      navigate('/home');
     } catch (err) {
       console.error('Error response:', err.response);
         if (err.response && err.response.status === 400) {
