@@ -7,12 +7,4 @@ const api = axios.create({
   },
 });
 
-api.interceptors.request.use(
-  (config) => {
-    config.headers['Authorization'] = `Bearer admin-token`;
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
 export default api;
