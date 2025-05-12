@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from app.controllers.admin import AdminController
-from app.models.admin import AdminCreate, AdminOut, AdminLogin, Token, UserOut
+from app.models.admin import AdminCreate, AdminOut, AdminLogin, Token
+from app.models.users import UserOut
 
 
 class AdminRouter:

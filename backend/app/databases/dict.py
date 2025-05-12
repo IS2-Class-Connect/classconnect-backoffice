@@ -41,9 +41,11 @@ class DictDB(DB):
     @override
     async def delete(self, collection: str, id: str) -> bool:
         return self._db[collection].pop(id, None) is not None
-        
+
     @override
-    async def find_one_by_filter(self, collection: str, filter: dict[str, Any]) -> Optional[dict[str, Any]]:
+    async def find_one_by_filter(
+        self, collection: str, filter: dict[str, Any]
+    ) -> Optional[dict[str, Any]]:
         for doc in self._db[collection].values():
             if all(doc.get(k) == v for k, v in filter.items()):
                 return doc

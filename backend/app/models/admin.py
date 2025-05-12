@@ -1,3 +1,4 @@
+import datetime
 from pydantic import BaseModel, EmailStr, Field
 
 
@@ -6,20 +7,18 @@ class AdminCreate(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=6)
 
-class UserOut(BaseModel):
-    email: EmailStr
-    name: str
-    urlProfilePhoto: str
-    description: str
 
 class AdminOut(BaseModel):
     id: str
     username: str
     email: EmailStr
+    registration_date: str
+
 
 class AdminLogin(BaseModel):
     email: EmailStr
     password: str
+
 
 class Token(BaseModel):
     access_token: str

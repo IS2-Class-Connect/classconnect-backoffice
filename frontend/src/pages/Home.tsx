@@ -1,4 +1,10 @@
+import UserList from '../components/UserList';
+import '../styles/Home.css';
+
 export default function Home() {
-    return <h1>Backoffice working 🧠</h1>;
-  }
-  
+  return (
+    <div className="home-container">
+      <UserList />
+    </div>
+  );
+}
