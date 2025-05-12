@@ -9,7 +9,7 @@ const UserList = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const usersResponse = await api.get('/admins/users');
+        const usersResponse = await api.get('/admin-backend/users');
         const adminsResponse = await api.get('admins');
         setAdmins(adminsResponse.data)
         setUsers(usersResponse.data);
