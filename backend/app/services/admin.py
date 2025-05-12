@@ -84,3 +84,14 @@ class AdminService:
             raise HTTPException(
                 status_code=502, detail="Failed to connect to users service"
             )
+    async def update_user_lock_status(self, uuid: str, locked: bool):
+        url = f"{self._gateway_url}/admin-backend/users/{uuid}/lock-status"
+        headers = {"Authorization": f"Bearer {self._admin_token}"}
+        data = {"locked": locked}
+
+        try:
+            res = requests.patch(url, json=data, headers=headers, timeout=5)
+            res.raise_for_status()
+            return res.json()
+        except requests.exceptions.RequestException:
+            raise HTTPException(status_code=502, detail="Failed to connect to users service")

@@ -1,7 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Body
 from app.controllers.admin import AdminController
 from app.models.admin import AdminCreate, AdminOut, AdminLogin, Token
 from app.models.users import UserOut
+from app.models.admin import LockStatusUpdate
 
 
 class AdminRouter:
@@ -17,6 +18,7 @@ class AdminRouter:
         self.router.get("", response_model=list[AdminOut])(self.get_all_admins)
         self.router.delete("/{id}", status_code=204)(self.delete_admin)
         self.router.post("/login", response_model=Token)(self.login)
+        self.router.patch("/users/{uuid}/lock-status")(self.update_user_lock_status)
 
     async def login(self, login_data: AdminLogin):
         return await self._controller.login(login_data)
@@ -35,3 +37,6 @@ class AdminRouter:
 
     async def get_all_users(self):
         return await self._controller.get_all_users()
+
+    async def update_user_lock_status(self, uuid: str, payload: LockStatusUpdate):
+        return await self._controller.update_user_lock_status(uuid, payload.locked)
