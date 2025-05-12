@@ -11,10 +11,8 @@ const UserList = () => {
       try {
         const usersResponse = await api.get('/admin-backend/users');
         const adminsResponse = await api.get('admins');
-        setAdmins(adminsResponse.data)
+        setAdmins(adminsResponse.data);
         setUsers(usersResponse.data);
-        console.log(usersResponse.data);
-        console.log(adminsResponse.data);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -23,9 +21,35 @@ const UserList = () => {
     fetchData();
   }, []);
 
+  const blockUser = async (uuid) => {
+    try {
+      await api.post(`/admin-backend/users/${uuid}/block`);
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user.uuid === uuid ? { ...user, accountBlockedByAdmins: true } : user
+        )
+      );
+    } catch (error) {
+      console.error('Failed to block user:', error);
+    }
+  };
+
+  const unblockUser = async (uuid) => {
+    try {
+      await api.post(`/admin-backend/users/${uuid}/unblock`);
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user.uuid === uuid ? { ...user, accountBlockedByAdmins: false } : user
+        )
+      );
+    } catch (error) {
+      console.error('Failed to unblock user:', error);
+    }
+  };
+
   const formatActiveness = (isBlocked) => {
     return isBlocked ? 'Blocked' : 'Active';
-  }
+  };
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -34,7 +58,7 @@ const UserList = () => {
       month: '2-digit',
       day: '2-digit',
     });
-  }
+  };
 
   return (
     <div>
@@ -46,6 +70,7 @@ const UserList = () => {
             <th>Name</th>
             <th>Status</th>
             <th>Registration Date</th>
+            <th>Actions</th> 
           </tr>
         </thead>
         <tbody>
@@ -54,10 +79,18 @@ const UserList = () => {
               <td>{user.name}</td>
               <td>{formatActiveness(user.accountBlockedByAdmins)}</td>
               <td>{formatDate(user.createdAt)}</td>
+              <td>
+                {user.accountBlockedByAdmins ? (
+                  <button onClick={() => unblockUser(user.uuid)}>Unblock</button>
+                ) : (
+                  <button onClick={() => blockUser(user.uuid)}>Block</button>
+                )}
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
+
       <h2>Admins</h2>
       <table>
         <thead>
