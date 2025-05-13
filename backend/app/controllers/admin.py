@@ -72,3 +72,11 @@ class AdminController:
             raise HTTPException(
                 status_code=500, detail="Server error during get all users"
             )
+
+    async def update_user_lock_status(self, uuid: str, locked: bool):
+        try:
+            return await self._service.update_user_lock_status(uuid, locked)
+        except HTTPException:
+            raise
+        except Exception:
+            raise HTTPException(status_code=500, detail="Server error updating lock status")
