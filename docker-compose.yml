@@ -12,7 +12,7 @@ services:
 
   admins:
     container_name: admins
-    build: ./backend
+    build: .
     networks:
       - my-network
     ports:
