@@ -20,6 +20,7 @@ const UserList = () => {
 
     fetchData();
   }, []);
+
   const updateUserLockStatus = async (uuid, locked) => {
     try {
       await api.patch(`/admins/users/${uuid}/lock-status`, { locked });
@@ -33,6 +34,28 @@ const UserList = () => {
     }
   };
 
+  const updateUserRole = async (uuid, courseId, newRole) => {
+    try {
+      await api.patch(`/admins/education/${uuid}/courses/${courseId}/role`, { role: newRole });
+      setUsers((prevUsers) =>
+        prevUsers.map((user) => {
+          if (user.uuid === uuid) {
+            return {
+              ...user,
+              enrollments: user.enrollments.map((enrollment) =>
+                enrollment.course.id === courseId
+                  ? { ...enrollment, role: newRole }
+                  : enrollment
+              ),
+            };
+          }
+          return user;
+        })
+      );
+    } catch (error) {
+      console.error('Error updating user role:', error);
+    }
+  };
 
   const formatActiveness = (isBlocked) => {
     return isBlocked ? 'Blocked' : 'Active';
@@ -50,6 +73,7 @@ const UserList = () => {
   return (
     <div>
       <h1>User Management</h1>
+
       <h2>Users</h2>
       <table>
         <thead>
@@ -57,7 +81,8 @@ const UserList = () => {
             <th>Name</th>
             <th>Status</th>
             <th>Registration Date</th>
-            <th>Actions</th> 
+            <th>Courses</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -67,10 +92,30 @@ const UserList = () => {
               <td>{formatActiveness(user.accountLockedByAdmins)}</td>
               <td>{formatDate(user.createdAt)}</td>
               <td>
-                {user.accountLockedByAdmins ? (
-                  <button onClick={() => updateUserLockStatus(user.uuid,false)}>Unblock</button>
+                {user.enrollments && user.enrollments.length > 0 ? (
+                  user.enrollments.map((enrollment) => (
+                    <div key={enrollment.course.id} className="course-entry">
+                      <span>{enrollment.course.title} - </span>
+                      <select
+                        value={enrollment.role}
+                        onChange={(e) =>
+                          updateUserRole(user.uuid, enrollment.course.id, e.target.value)
+                        }
+                      >
+                        <option value="STUDENT">Student</option>
+                        <option value="ASSISTANT">Assistant</option>
+                      </select>
+                    </div>
+                  ))
                 ) : (
-                  <button onClick={() => updateUserLockStatus(user.uuid,true)}>Block</button>
+                  <span>No enrollments available</span>
+                )}
+              </td>
+              <td>
+                {user.accountLockedByAdmins ? (
+                  <button onClick={() => updateUserLockStatus(user.uuid, false)}>Unblock</button>
+                ) : (
+                  <button onClick={() => updateUserLockStatus(user.uuid, true)}>Block</button>
                 )}
               </td>
             </tr>
