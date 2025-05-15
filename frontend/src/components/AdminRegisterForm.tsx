@@ -4,14 +4,14 @@ import '../styles/RegisterForm.css';
 import { useNavigate } from 'react-router-dom';
 
 function AdminRegisterForm() {
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [username, setUsername] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
   const navigate = useNavigate();
 
-  const handleRegister = async (e) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setErrorMessage('');
@@ -22,7 +22,7 @@ function AdminRegisterForm() {
         password,
       });
       navigate('/home');
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error response:', err.response);
         if (err.response && err.response.status === 400) {
             setErrorMessage('Registration failed: Invalid data');
