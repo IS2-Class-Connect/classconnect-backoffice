@@ -1,10 +1,32 @@
 from contextlib import asynccontextmanager
 import os
-from fastapi import FastAPI
+import time
+from fastapi import FastAPI, Request
 from app.databases.mongo import MongoDB
 from app.services.admin import AdminService
 from app.controllers.admin import AdminController
 from app.routers.admin import AdminRouter
+from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST, CollectorRegistry, PlatformCollector, ProcessCollector, Gauge
+from fastapi.responses import Response
+import psutil
+from fastapi_utils.tasks import repeat_every  
+import threading
+
+REQUEST_COUNT = Counter(
+"http_requests_total", "Total HTTP requests", ["method", "endpoint", "http_status"]
+)
+REQUEST_LATENCY = Histogram(
+    "http_request_duration_seconds", "HTTP request latency", ["method", "endpoint"]
+)
+# Use a custom registry to include default collectors
+registry = CollectorRegistry()
+PlatformCollector(registry=registry)  
+ProcessCollector(registry=registry)  
+
+CPU_USAGE = Gauge("cpu_usage_percent", "CPU usage percentage")
+
+MEMORY_USAGE = Gauge("memory_usage_bytes", "Memory usage in bytes")
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -33,3 +55,33 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+@app.middleware("http")
+async def prometheus_middleware(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+
+    # Update metrics
+    REQUEST_COUNT.labels(
+        method=request.method, endpoint=request.url.path, http_status=response.status_code
+    ).inc()
+    REQUEST_LATENCY.labels(method=request.method, endpoint=request.url.path).observe(process_time)
+
+    return response
+
+@app.get("/metrics")
+async def metrics():
+    return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
+def track_cpu_usage():
+    process = psutil.Process(os.getpid())
+    while True:
+        CPU_USAGE.set(process.cpu_percent(interval=1))
+threading.Thread(target=track_cpu_usage, daemon=True).start()
+def track_memory_usage():
+    process = psutil.Process(os.getpid())
+    while True:
+        MEMORY_USAGE.set(process.memory_info().rss)  # Resident Set Size (RSS) in bytes
+        time.sleep(1)
+threading.Thread(target=track_memory_usage, daemon=True).start()

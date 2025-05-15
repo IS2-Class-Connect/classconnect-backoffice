@@ -1,3 +1,4 @@
+version: '3.8'
 services:
   mongo:
     image: mongo:6.0
@@ -23,19 +24,40 @@ services:
     depends_on:
       - mongo
 
-  prometheus:
+  frontend:
+    container_name: frontend
+    build: ./frontend
+    ports:
+      - "5173:5173" 
+    networks:
+      - monitor-net
+
+  prometheus-main:
     image: prom/prometheus
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml
     ports:
-      - "9090:9090"
+      - "9095:9090"
     networks:
       - monitor-net
 
   grafana:
     image: grafana/grafana
     ports:
-      - "3006:3006"
+      - "3006:3000"
+    volumes:
+    - ./grafana/grafana.ini:/etc/grafana/grafana.ini
+    networks:
+      - monitor-net
+
+  alertmanager:
+    image: prom/alertmanager
+    container_name: alertmanager
+    ports:
+      - "9094:9094"
+    volumes:
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
     networks:
       - monitor-net
 
@@ -44,4 +66,5 @@ volumes:
 
 networks:
   monitor-net:
-    driver: bridge
+    external: 
+      name: classconnect_net
