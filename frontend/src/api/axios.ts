@@ -1,7 +1,7 @@
-import axios, { AxiosInstance } from 'axios';
+import axios from 'axios';
 
-const api: AxiosInstance = axios.create({
-  baseURL: process.env.ADMINS_URL ?? "localhost:3004",
+const api = axios.create({
+  baseURL: import.meta.env.VITE_ADMINS_URL,
   headers: {
     'Content-Type': 'application/json',
   },
