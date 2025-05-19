@@ -1,7 +1,21 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
 import '../styles/UserList.css';
-
+interface Course {
+  id: string;
+  title: string;
+}
+interface Enrollment {
+  userId: string;
+  role: string;
+  course: Course;
+}
+interface User {
+  uuid: string;
+  name: string;
+  email: string;
+  enrollments: Enrollment[];
+}
 const UserList = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [admins, setAdmins] = useState<any[]>([]);
@@ -18,14 +32,14 @@ const UserList = () => {
 
         const enrollmentsMap = new Map();
 
-        enrollments.forEach(({ userId, role, course }) => {
+        enrollments.forEach(({ userId, role, course }: Enrollment) => {
           if (!enrollmentsMap.has(userId)) {
             enrollmentsMap.set(userId, []);
           }
           enrollmentsMap.get(userId).push({ role, course });
         });
 
-        const usersWithEnrollments = users.map(user => ({
+        const usersWithEnrollments = users.map((user: User)=> ({
           ...user,
           enrollments: enrollmentsMap.get(user.uuid) || [],
         }));
@@ -62,11 +76,11 @@ const UserList = () => {
           if (user.uuid === uuid) {
             return {
               ...user,
-              enrollments: user.enrollments.map((enrollment) =>
+              enrollments: user.enrollments.map((enrollment: Enrollment) => (
                 enrollment.course.id === courseId
                   ? { ...enrollment, role: newRole }
                   : enrollment
-              ),
+              )),
             };
           }
           return user;
@@ -113,7 +127,7 @@ const UserList = () => {
               <td>{formatDate(user.createdAt)}</td>
               <td>
                 {user.enrollments && user.enrollments.length > 0 ? (
-                  user.enrollments.map((enrollment) => (
+                  user.enrollments.map((enrollment: Enrollment) => (
                     <div key={enrollment.course.id} className="course-entry">
                       <span>{enrollment.course.title} - </span>
                       <select
