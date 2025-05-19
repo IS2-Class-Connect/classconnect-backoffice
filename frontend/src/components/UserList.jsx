@@ -11,8 +11,28 @@ const UserList = () => {
       try {
         const usersResponse = await api.get('/admins/users');
         const adminsResponse = await api.get('/admins');
+        const adminsEnrollmentResponse = await api.get('/admins/courses/enrollments');
+
+        const users = usersResponse.data;
+        const enrollments = adminsEnrollmentResponse.data;
+
+        const enrollmentsMap = new Map();
+
+        enrollments.forEach(({ userId, role, course }) => {
+          if (!enrollmentsMap.has(userId)) {
+            enrollmentsMap.set(userId, []);
+          }
+          enrollmentsMap.get(userId).push({ role, course });
+        });
+
+        const usersWithEnrollments = users.map(user => ({
+          ...user,
+          enrollments: enrollmentsMap.get(user.uuid) || [],
+        }));
+
         setAdmins(adminsResponse.data);
-        setUsers(usersResponse.data);
+        console.log(usersWithEnrollments)
+        setUsers(usersWithEnrollments);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -20,6 +40,7 @@ const UserList = () => {
 
     fetchData();
   }, []);
+
 
   const updateUserLockStatus = async (uuid, locked) => {
     try {

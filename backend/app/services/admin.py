@@ -2,7 +2,7 @@ from typing import Optional
 from app.databases.db import DB
 from app.exceptions.username_or_email import UsernameEmailInUser
 from app.models.admin import AdminCreate, AdminOut, AdminLogin, Token
-from app.models.users import UserOut
+from app.models.users import UserOut, EnrollmentUsers, Enrollment
 import bcrypt
 from fastapi import HTTPException
 from datetime import datetime, timedelta
@@ -84,6 +84,23 @@ class AdminService:
             raise HTTPException(
                 status_code=502, detail="Failed to connect to users service"
             )
+
+    async def get_all_users_enrollment(self) ->  list[Enrollment]:
+        url = f"{self._gateway_url}/admin-backend/courses/enrollments"
+        headers = {"Authorization": f"Bearer {self._admin_token}"}
+
+        try:
+            res = requests.get(url, headers=headers, timeout=5)
+            res.raise_for_status()
+            data = res.json()  
+            print(data)
+            return EnrollmentUsers(**data).data
+        except requests.exceptions.RequestException:
+            raise HTTPException(
+                status_code=502, detail="Failed to connect to education service"
+            )
+
+
     async def update_user_lock_status(self, uuid: str, locked: bool):
         url = f"{self._gateway_url}/admin-backend/users/{uuid}/lock-status"
         headers = {"Authorization": f"Bearer {self._admin_token}"}
