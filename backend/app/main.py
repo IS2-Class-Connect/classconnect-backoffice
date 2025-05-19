@@ -1,14 +1,16 @@
 from contextlib import asynccontextmanager
 import os
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.databases.mongo import MongoDB
 from app.services.admin import AdminService
 from app.controllers.admin import AdminController
 from app.routers.admin import AdminRouter
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    
+
     DB_URI = os.getenv("DB_URI")
     if not DB_URI:
         raise ValueError("No database URI was provided")
@@ -41,3 +43,12 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+# Enable CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)

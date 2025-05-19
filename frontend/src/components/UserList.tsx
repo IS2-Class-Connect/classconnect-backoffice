@@ -3,8 +3,8 @@ import api from '../api/axios';
 import '../styles/UserList.css';
 
 const UserList = () => {
-  const [users, setUsers] = useState([]);
-  const [admins, setAdmins] = useState([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const [admins, setAdmins] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,12 +39,16 @@ const UserList = () => {
 
     fetchData();
   }, []);
+<<<<<<< HEAD:frontend/src/components/UserList.jsx
 
 
   const updateUserLockStatus = async (uuid, locked) => {
+=======
+  const updateUserLockStatus = async (uuid: string, locked: boolean) => {
+>>>>>>> main:frontend/src/components/UserList.tsx
     try {
       await api.patch(`/admins/users/${uuid}/lock-status`, { locked });
-      setUsers((prevUsers) =>
+      setUsers((prevUsers: any[]) =>
         prevUsers.map((user) =>
           user.uuid === uuid ? { ...user, accountLockedByAdmins: locked } : user
         )
@@ -77,11 +81,11 @@ const UserList = () => {
     }
   };
 
-  const formatActiveness = (isBlocked) => {
+  const formatActiveness = (isBlocked: boolean) => {
     return isBlocked ? 'Blocked' : 'Active';
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
