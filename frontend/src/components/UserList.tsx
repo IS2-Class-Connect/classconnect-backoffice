@@ -39,13 +39,9 @@ const UserList = () => {
 
     fetchData();
   }, []);
-<<<<<<< HEAD:frontend/src/components/UserList.jsx
 
 
   const updateUserLockStatus = async (uuid, locked) => {
-=======
-  const updateUserLockStatus = async (uuid: string, locked: boolean) => {
->>>>>>> main:frontend/src/components/UserList.tsx
     try {
       await api.patch(`/admins/users/${uuid}/lock-status`, { locked });
       setUsers((prevUsers: any[]) =>
