@@ -13,6 +13,9 @@ class Enrollment(BaseModel):
 class EnrollmentUsers(BaseModel):
     data: List[Enrollment]
 
+class EnrollmentUpdate(BaseModel):
+    role: str
+
 class UserOut(BaseModel):
     uuid: str
     email: EmailStr

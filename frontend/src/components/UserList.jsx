@@ -31,7 +31,6 @@ const UserList = () => {
         }));
 
         setAdmins(adminsResponse.data);
-        console.log(usersWithEnrollments)
         setUsers(usersWithEnrollments);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -57,7 +56,7 @@ const UserList = () => {
 
   const updateUserRole = async (uuid, courseId, newRole) => {
     try {
-      await api.patch(`/admins/education/${uuid}/courses/${courseId}/role`, { role: newRole });
+      await api.patch(`/admins/courses/${courseId}/enrollments/${uuid}`, { role: newRole });
       setUsers((prevUsers) =>
         prevUsers.map((user) => {
           if (user.uuid === uuid) {
