@@ -41,7 +41,7 @@ const UserList = () => {
   }, []);
 
 
-  const updateUserLockStatus = async (uuid, locked) => {
+  const updateUserLockStatus = async (uuid: string, locked: boolean) => {
     try {
       await api.patch(`/admins/users/${uuid}/lock-status`, { locked });
       setUsers((prevUsers: any[]) =>
@@ -54,7 +54,7 @@ const UserList = () => {
     }
   };
 
-  const updateUserRole = async (uuid, courseId, newRole) => {
+  const updateUserRole = async (uuid: string, courseId: string, newRole: string) => {
     try {
       await api.patch(`/admins/courses/${courseId}/enrollments/${uuid}`, { role: newRole });
       setUsers((prevUsers) =>
