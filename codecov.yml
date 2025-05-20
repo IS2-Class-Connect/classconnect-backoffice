@@ -1,0 +1,10 @@
+coverage:
+  status:
+    patch:
+      default:
+        target: 75%
+
+ignore:
+  - backend/app/main.py
+  - backend/curls
+  - backend/app/databases/mongo.py
