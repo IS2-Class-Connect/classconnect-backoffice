@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Body
+from fastapi import APIRouter
 from app.controllers.admin import AdminController
 from app.models.admin import AdminCreate, AdminOut, AdminLogin, Token
-from app.models.users import UserOut, EnrollmentUsers, Enrollment, EnrollmentUpdate
+from app.models.users import UserOut, Enrollment, EnrollmentUpdate
 from app.models.admin import LockStatusUpdate
+import logging
 
 
 class AdminRouter:
@@ -19,8 +20,12 @@ class AdminRouter:
         self.router.delete("/{id}", status_code=204)(self.delete_admin)
         self.router.post("/login", response_model=Token)(self.login)
         self.router.patch("/users/{uuid}/lock-status")(self.update_user_lock_status)
-        self.router.get("/courses/enrollments", response_model=list[Enrollment])(self.get_all_users_enrollment)
-        self.router.patch("/courses/{courseId}/enrollments/{uuid}")(self.update_user_enrollment)
+        self.router.get("/courses/enrollments", response_model=list[Enrollment])(
+            self.get_all_users_enrollment
+        )
+        self.router.patch("/courses/{courseId}/enrollments/{uuid}")(
+            self.update_user_enrollment
+        )
 
     async def login(self, login_data: AdminLogin):
         return await self._controller.login(login_data)
@@ -45,6 +50,10 @@ class AdminRouter:
 
     async def update_user_lock_status(self, uuid: str, payload: LockStatusUpdate):
         return await self._controller.update_user_lock_status(uuid, payload.locked)
-    
-    async def update_user_enrollment(self,courseId: str, uuid: str, enrollmentData: EnrollmentUpdate):
-        return await self._controller.update_user_enrollment(uuid,courseId,enrollmentData)
+
+    async def update_user_enrollment(
+        self, courseId: str, uuid: str, enrollmentData: EnrollmentUpdate
+    ):
+        return await self._controller.update_user_enrollment(
+            uuid, courseId, enrollmentData
+        )

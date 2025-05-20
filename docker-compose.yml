@@ -18,6 +18,7 @@ services:
     ports:
       - 3004:3004
     environment:
+      - PYTHONUNBUFFERED=1
       - DB_URI=mongodb://db_admins:27017
       - DB_NAME=backoffice
       - ADMIN_TOKEN=admin-token

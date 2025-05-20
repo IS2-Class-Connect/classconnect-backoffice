@@ -8,6 +8,7 @@ from fastapi import HTTPException
 from datetime import datetime, timedelta
 import jwt
 import requests
+import logging
 
 SECRET_KEY = "secret"
 ALGORITHM = "HS256"
@@ -85,21 +86,19 @@ class AdminService:
                 status_code=502, detail="Failed to connect to users service"
             )
 
-    async def get_all_users_enrollment(self) ->  list[Enrollment]:
+    async def get_all_users_enrollment(self) -> list[Enrollment]:
         url = f"{self._gateway_url}/admin-backend/courses/enrollments"
         headers = {"Authorization": f"Bearer {self._admin_token}"}
 
         try:
             res = requests.get(url, headers=headers, timeout=5)
             res.raise_for_status()
-            data = res.json()  
-            print(data)
+            data = res.json()
             return EnrollmentUsers(**data).data
         except requests.exceptions.RequestException:
             raise HTTPException(
                 status_code=502, detail="Failed to connect to education service"
             )
-
 
     async def update_user_lock_status(self, uuid: str, locked: bool):
         url = f"{self._gateway_url}/admin-backend/users/{uuid}/lock-status"
@@ -109,11 +108,16 @@ class AdminService:
         try:
             res = requests.patch(url, json=data, headers=headers, timeout=5)
             res.raise_for_status()
+            logging.info("blocked" * locked + "unblocked" * locked + f" user {uuid}")
             return res.json()
         except requests.exceptions.RequestException:
-            raise HTTPException(status_code=502, detail="Failed to connect to users service")
+            raise HTTPException(
+                status_code=502, detail="Failed to connect to users service"
+            )
 
-    async def update_user_enrollment(self,courseId: str, uuid: str, enrollmentData: EnrollmentUpdate):
+    async def update_user_enrollment(
+        self, courseId: str, uuid: str, enrollmentData: EnrollmentUpdate
+    ):
         url = f"{self._gateway_url}/admin-backend/courses/{courseId}/enrollments/{uuid}"
         headers = {"Authorization": f"Bearer {self._admin_token}"}
         data = {"role": enrollmentData.role}
@@ -121,6 +125,11 @@ class AdminService:
         try:
             res = requests.patch(url, json=data, headers=headers, timeout=5)
             res.raise_for_status()
+            logging.info(
+                f"updated role for user {uuid} to {enrollmentData.role} at course {courseId}"
+            )
             return res.json()
         except requests.exceptions.RequestException:
-            raise HTTPException(status_code=502, detail="Failed to connect to education service")
+            raise HTTPException(
+                status_code=502, detail="Failed to connect to education service"
+            )

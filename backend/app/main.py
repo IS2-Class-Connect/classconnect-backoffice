@@ -6,6 +6,23 @@ from app.databases.mongo import MongoDB
 from app.services.admin import AdminService
 from app.controllers.admin import AdminController
 from app.routers.admin import AdminRouter
+import logging
+
+
+def initialize_log(logging_level):
+    class CustomFormatter(logging.Formatter):
+        def format(self, record):
+            record.levelname = f"{record.levelname}:".ljust(9)
+            return super().format(record)
+
+    handler = logging.StreamHandler()
+    handler.setFormatter(
+        CustomFormatter(
+            fmt="%(levelname)s %(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+        )
+    )
+
+    logging.basicConfig(level=logging_level, handlers=[handler])
 
 
 @asynccontextmanager
@@ -36,6 +53,7 @@ async def lifespan(app: FastAPI):
     controller = AdminController(service)
     admin_router = AdminRouter(controller)
     app.include_router(admin_router.router)
+    initialize_log(logging.INFO)
 
     yield
 

@@ -12,7 +12,6 @@ class AdminController:
     async def create_admin(self, admin: AdminCreate) -> AdminOut:
         try:
             created_admin = await self._service.create_admin(admin)
-            print(created_admin)
             return created_admin
         except UsernameEmailInUser as e:
             raise HTTPException(status_code=409, detail=str(e))
@@ -79,21 +78,29 @@ class AdminController:
         except HTTPException:
             raise
         except Exception:
-            raise HTTPException(status_code=500, detail="Server error updating lock status")
-  
-    async def get_all_users_enrollment(self) ->  list[Enrollment]:
+            raise HTTPException(
+                status_code=500, detail="Server error updating lock status"
+            )
+
+    async def get_all_users_enrollment(self) -> list[Enrollment]:
         try:
             return await self._service.get_all_users_enrollment()
         except Exception:
             raise HTTPException(
-                status_code=500, detail="Failed to get all users enrollemnts due to server error"
+                status_code=500,
+                detail="Failed to get all users enrollemnts due to server error",
             )
 
-    async def update_user_enrollment(self,courseId: str, uuid: str, enrollmentData: EnrollmentUpdate):
+    async def update_user_enrollment(
+        self, courseId: str, uuid: str, enrollmentData: EnrollmentUpdate
+    ):
         try:
-            return await self._service.update_user_enrollment(uuid,courseId,enrollmentData)
+            return await self._service.update_user_enrollment(
+                uuid, courseId, enrollmentData
+            )
         except HTTPException:
             raise
         except Exception:
-            raise HTTPException(status_code=500, detail="Server error updating lock status")
-  
+            raise HTTPException(
+                status_code=500, detail="Server error updating lock status"
+            )
