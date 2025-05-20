@@ -86,9 +86,11 @@ const UserList = () => {
           return user;
         })
       );
-    } catch (error) {
-      console.error('Error updating user role:', error);
-    }
+    alert("Updated role");
+  } catch (error) {
+    console.error("Error updating user role:", error);
+    alert("Error updating user role");
+  }
   };
 
   const formatActiveness = (isBlocked: boolean) => {
