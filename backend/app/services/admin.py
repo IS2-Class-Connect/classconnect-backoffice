@@ -69,7 +69,7 @@ class AdminService:
         if not self.verify_password(login_data.password, admin["password"]):
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
-        token = self.create_token({"sub": str(admin["_id"]), "email": admin["email"]})
+        token = self.create_token({"sub": str(admin["id"]), "email": admin["email"]})
         return Token(access_token=token)
 
     async def get_all_users(self) -> list[UserOut]:
