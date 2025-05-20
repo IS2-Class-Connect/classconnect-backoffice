@@ -277,6 +277,15 @@ def test_lock_status(client: TestClient):
     users[uuid].accountLockedByAdmins = False
 
 
+def test_lock_status_invalid_id(client: TestClient):
+    uuid = "123456789"
+
+    data = LockStatusUpdate(locked=True)
+    res = client.patch(f"/admins/users/{uuid}/lock-status", json=data.model_dump())
+
+    assert res.status_code == 404
+
+
 ###
 #
 # User Enrollment Retrieval
