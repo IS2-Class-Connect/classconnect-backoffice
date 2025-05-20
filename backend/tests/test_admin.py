@@ -161,7 +161,6 @@ def test_login_failure(client: TestClient):
     assert res.status_code == 401
     assert res.json() == {"detail": "Invalid credentials"}
 
-
 mock_users = [
     {
         "uuid": "1",
@@ -184,7 +183,7 @@ mock_users = [
 ]
 
 @pytest.fixture
-def mock_requests(monkeypatch):
+def mock_requests_users(monkeypatch):
     def mock_get(url, headers=None, timeout=5):
         class MockResponse:
             def raise_for_status(self): pass
@@ -193,7 +192,7 @@ def mock_requests(monkeypatch):
 
     monkeypatch.setattr("requests.get", mock_get)
 
-def test_get_all_users(client: TestClient, mock_requests):
+def test_get_all_users(client: TestClient, mock_requests_users):
     response = client.get("/admins/users")
     assert response.status_code == 200
     data = response.json()
@@ -201,3 +200,49 @@ def test_get_all_users(client: TestClient, mock_requests):
     assert len(data) == 2
     assert data[0]["name"] == "juan"
     assert data[1]["email"] == "maria@example.com"
+
+mock_enrollments_response = {
+    "data": [
+        {
+            "role": "student",
+            "userId": "user1",
+            "course": {
+                "id": 101,
+                "title": "Matemáticas Básicas"
+            }
+        },
+        {
+            "role": "teacher",
+            "userId": "user2",
+            "course": {
+                "id": 102,
+                "title": "Historia Universal"
+            }
+        }
+    ]
+}
+
+@pytest.fixture
+def mock_requests_enrollments(monkeypatch):
+    def mock_get(url, headers=None, timeout=5):
+        class MockResponse:
+            def raise_for_status(self): pass
+            def json(self): return mock_enrollments_response
+        return MockResponse()
+
+    monkeypatch.setattr("requests.get", mock_get)
+
+def test_get_all_users_enrollment(client: TestClient, mock_requests_enrollments):
+    response = client.get("/admins/courses/enrollments")
+    assert response.status_code == 200
+
+    data = response.json()
+    assert isinstance(data, list)
+    assert len(data) == 2
+
+    assert data[0]["role"] == "student"
+    assert data[0]["userId"] == "user1"
+    assert data[0]["course"]["title"] == "Matemáticas Básicas"
+
+    assert data[1]["role"] == "teacher"
+    assert data[1]["course"]["id"] == 102
