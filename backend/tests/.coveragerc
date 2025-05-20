@@ -1,0 +1,9 @@
+[run]
+omit =
+    app/main.py
+    app/databases/mongo.py
+    app/databases/db.py
+    app/services/service.py
+
+[report]
+show_missing = True

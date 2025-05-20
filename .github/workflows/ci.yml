@@ -33,8 +33,7 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest --cov=backend --cov-branch --cov-report=xml
-
+          pytest --cov=backend/app --cov-branch --cov-report=xml --cov-config=backend/tests/.coveragerc
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
