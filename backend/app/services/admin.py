@@ -2,7 +2,7 @@ from typing import Optional
 from app.databases.db import DB
 from app.exceptions.username_or_email import UsernameEmailInUser
 from app.models.admin import AdminCreate, AdminOut, AdminLogin, Token
-from app.models.users import UserOut
+from app.models.users import UserOut, EnrollmentUsers, Enrollment, EnrollmentUpdate
 import bcrypt
 from fastapi import HTTPException
 from datetime import datetime, timedelta
@@ -69,7 +69,7 @@ class AdminService:
         if not self.verify_password(login_data.password, admin["password"]):
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
-        token = self.create_token({"sub": str(admin["_id"]), "email": admin["email"]})
+        token = self.create_token({"sub": str(admin["id"]), "email": admin["email"]})
         return Token(access_token=token)
 
     async def get_all_users(self) -> list[UserOut]:
@@ -84,6 +84,23 @@ class AdminService:
             raise HTTPException(
                 status_code=502, detail="Failed to connect to users service"
             )
+
+    async def get_all_users_enrollment(self) ->  list[Enrollment]:
+        url = f"{self._gateway_url}/admin-backend/courses/enrollments"
+        headers = {"Authorization": f"Bearer {self._admin_token}"}
+
+        try:
+            res = requests.get(url, headers=headers, timeout=5)
+            res.raise_for_status()
+            data = res.json()  
+            print(data)
+            return EnrollmentUsers(**data).data
+        except requests.exceptions.RequestException:
+            raise HTTPException(
+                status_code=502, detail="Failed to connect to education service"
+            )
+
+
     async def update_user_lock_status(self, uuid: str, locked: bool):
         url = f"{self._gateway_url}/admin-backend/users/{uuid}/lock-status"
         headers = {"Authorization": f"Bearer {self._admin_token}"}
@@ -95,3 +112,15 @@ class AdminService:
             return res.json()
         except requests.exceptions.RequestException:
             raise HTTPException(status_code=502, detail="Failed to connect to users service")
+
+    async def update_user_enrollment(self,courseId: str, uuid: str, enrollmentData: EnrollmentUpdate):
+        url = f"{self._gateway_url}/admin-backend/courses/{courseId}/enrollments/{uuid}"
+        headers = {"Authorization": f"Bearer {self._admin_token}"}
+        data = {"role": enrollmentData.role}
+
+        try:
+            res = requests.patch(url, json=data, headers=headers, timeout=5)
+            res.raise_for_status()
+            return res.json()
+        except requests.exceptions.RequestException:
+            raise HTTPException(status_code=502, detail="Failed to connect to education service")

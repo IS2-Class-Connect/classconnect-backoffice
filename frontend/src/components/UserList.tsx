@@ -1,7 +1,21 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
 import '../styles/UserList.css';
-
+interface Course {
+  id: string;
+  title: string;
+}
+interface Enrollment {
+  userId: string;
+  role: string;
+  course: Course;
+}
+interface User {
+  uuid: string;
+  name: string;
+  email: string;
+  enrollments: Enrollment[];
+}
 const UserList = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [admins, setAdmins] = useState<any[]>([]);
@@ -11,8 +25,27 @@ const UserList = () => {
       try {
         const usersResponse = await api.get('/admins/users');
         const adminsResponse = await api.get('/admins');
+        const adminsEnrollmentResponse = await api.get('/admins/courses/enrollments');
+
+        const users = usersResponse.data;
+        const enrollments = adminsEnrollmentResponse.data;
+
+        const enrollmentsMap = new Map();
+
+        enrollments.forEach(({ userId, role, course }: Enrollment) => {
+          if (!enrollmentsMap.has(userId)) {
+            enrollmentsMap.set(userId, []);
+          }
+          enrollmentsMap.get(userId).push({ role, course });
+        });
+
+        const usersWithEnrollments = users.map((user: User)=> ({
+          ...user,
+          enrollments: enrollmentsMap.get(user.uuid) || [],
+        }));
+
         setAdmins(adminsResponse.data);
-        setUsers(usersResponse.data);
+        setUsers(usersWithEnrollments);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -20,6 +53,8 @@ const UserList = () => {
 
     fetchData();
   }, []);
+
+
   const updateUserLockStatus = async (uuid: string, locked: boolean) => {
     try {
       await api.patch(`/admins/users/${uuid}/lock-status`, { locked });
@@ -33,6 +68,30 @@ const UserList = () => {
     }
   };
 
+  const updateUserRole = async (uuid: string, courseId: string, newRole: string) => {
+    try {
+      await api.patch(`/admins/courses/${courseId}/enrollments/${uuid}`, { role: newRole });
+      setUsers((prevUsers) =>
+        prevUsers.map((user) => {
+          if (user.uuid === uuid) {
+            return {
+              ...user,
+              enrollments: user.enrollments.map((enrollment: Enrollment) => (
+                enrollment.course.id === courseId
+                  ? { ...enrollment, role: newRole }
+                  : enrollment
+              )),
+            };
+          }
+          return user;
+        })
+      );
+    alert("Updated role");
+  } catch (error) {
+    console.error("Error updating user role:", error);
+    alert("Error updating user role");
+  }
+  };
 
   const formatActiveness = (isBlocked: boolean) => {
     return isBlocked ? 'Blocked' : 'Active';
@@ -50,6 +109,7 @@ const UserList = () => {
   return (
     <div>
       <h1>User Management</h1>
+
       <h2>Users</h2>
       <table>
         <thead>
@@ -57,7 +117,8 @@ const UserList = () => {
             <th>Name</th>
             <th>Status</th>
             <th>Registration Date</th>
-            <th>Actions</th> 
+            <th>Courses</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -67,10 +128,30 @@ const UserList = () => {
               <td>{formatActiveness(user.accountLockedByAdmins)}</td>
               <td>{formatDate(user.createdAt)}</td>
               <td>
-                {user.accountLockedByAdmins ? (
-                  <button onClick={() => updateUserLockStatus(user.uuid,false)}>Unblock</button>
+                {user.enrollments && user.enrollments.length > 0 ? (
+                  user.enrollments.map((enrollment: Enrollment) => (
+                    <div key={enrollment.course.id} className="course-entry">
+                      <span>{enrollment.course.title} - </span>
+                      <select
+                        value={enrollment.role}
+                        onChange={(e) =>
+                          updateUserRole(user.uuid, enrollment.course.id, e.target.value)
+                        }
+                      >
+                        <option value="STUDENT">Student</option>
+                        <option value="ASSISTANT">Assistant</option>
+                      </select>
+                    </div>
+                  ))
                 ) : (
-                  <button onClick={() => updateUserLockStatus(user.uuid,true)}>Block</button>
+                  <span>No enrollments available</span>
+                )}
+              </td>
+              <td>
+                {user.accountLockedByAdmins ? (
+                  <button onClick={() => updateUserLockStatus(user.uuid, false)}>Unblock</button>
+                ) : (
+                  <button onClick={() => updateUserLockStatus(user.uuid, true)}>Block</button>
                 )}
               </td>
             </tr>

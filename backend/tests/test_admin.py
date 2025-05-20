@@ -1,12 +1,11 @@
 import pytest
 from fastapi.testclient import TestClient
-from app.models.admin import AdminCreate
+from app.models.admin import AdminCreate, AdminLogin
 from app.routers.admin import AdminRouter
 from app.controllers.admin import AdminController
 from app.services.admin import AdminService
 from app.databases.dict import DictDB
 from fastapi import FastAPI
-
 
 @pytest.fixture
 def app():
@@ -136,3 +135,114 @@ def test_delete_admin(client: TestClient):
 def test_delete_admin_not_found(client: TestClient):
     res = client.delete("/admins/0")
     assert res.status_code == 404
+
+def test_login(client: TestClient):
+    admin = AdminCreate(
+        username="alice", email="alice@example.com", password="password"
+    )
+
+    res = client.post("/admins", json=admin.model_dump())
+    created = res.json()
+
+    assert res.status_code == 201
+    assert created["username"] == admin.username
+    assert created["email"] == admin.email
+
+    adminLogin = AdminLogin(email="alice@example.com", password="password")
+    res = client.post("/admins/login", json=adminLogin.model_dump())
+
+    assert res.status_code == 200
+    assert "access_token" in res.json()
+
+def test_login_failure(client: TestClient):
+    adminLogin = AdminLogin(email="unknown@example.com", password="incorrectPasswor")
+
+    res = client.post("/admins/login", json=adminLogin.model_dump())
+    assert res.status_code == 401
+    assert res.json() == {"detail": "Invalid credentials"}
+
+mock_users = [
+    {
+        "uuid": "1",
+        "email": "juan@example.com",
+        "name": "juan",
+        "urlProfilePhoto": "https://example.com/photo1.jpg",
+        "description": "Usuario activo",
+        "createdAt": "2025-05-20T15:00:00Z",
+        "accountLockedByAdmins": False,
+    },
+    {
+        "uuid": "2",
+        "email": "maria@example.com",
+        "name": "maria",
+        "urlProfilePhoto": "https://example.com/photo2.jpg",
+        "description": "Usuario activo",
+        "createdAt": "2025-05-20T15:05:00Z",
+        "accountLockedByAdmins": False,
+    },
+]
+
+@pytest.fixture
+def mock_requests_users(monkeypatch):
+    def mock_get(url, headers=None, timeout=5):
+        class MockResponse:
+            def raise_for_status(self): pass
+            def json(self): return mock_users
+        return MockResponse()
+
+    monkeypatch.setattr("requests.get", mock_get)
+
+def test_get_all_users(client: TestClient, mock_requests_users):
+    response = client.get("/admins/users")
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, list)
+    assert len(data) == 2
+    assert data[0]["name"] == "juan"
+    assert data[1]["email"] == "maria@example.com"
+
+mock_enrollments_response = {
+    "data": [
+        {
+            "role": "student",
+            "userId": "user1",
+            "course": {
+                "id": 101,
+                "title": "Matemáticas Básicas"
+            }
+        },
+        {
+            "role": "teacher",
+            "userId": "user2",
+            "course": {
+                "id": 102,
+                "title": "Historia Universal"
+            }
+        }
+    ]
+}
+
+@pytest.fixture
+def mock_requests_enrollments(monkeypatch):
+    def mock_get(url, headers=None, timeout=5):
+        class MockResponse:
+            def raise_for_status(self): pass
+            def json(self): return mock_enrollments_response
+        return MockResponse()
+
+    monkeypatch.setattr("requests.get", mock_get)
+
+def test_get_all_users_enrollment(client: TestClient, mock_requests_enrollments):
+    response = client.get("/admins/courses/enrollments")
+    assert response.status_code == 200
+
+    data = response.json()
+    assert isinstance(data, list)
+    assert len(data) == 2
+
+    assert data[0]["role"] == "student"
+    assert data[0]["userId"] == "user1"
+    assert data[0]["course"]["title"] == "Matemáticas Básicas"
+
+    assert data[1]["role"] == "teacher"
+    assert data[1]["course"]["id"] == 102

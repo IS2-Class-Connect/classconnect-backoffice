@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 from app.exceptions.username_or_email import UsernameEmailInUser
 from app.models.admin import AdminCreate, AdminOut, AdminLogin, Token
-from app.models.users import UserOut
+from app.models.users import UserOut, EnrollmentUsers, Enrollment, EnrollmentUpdate
 from app.services.admin import AdminService
 
 
@@ -80,3 +80,20 @@ class AdminController:
             raise
         except Exception:
             raise HTTPException(status_code=500, detail="Server error updating lock status")
+  
+    async def get_all_users_enrollment(self) ->  list[Enrollment]:
+        try:
+            return await self._service.get_all_users_enrollment()
+        except Exception:
+            raise HTTPException(
+                status_code=500, detail="Failed to get all users enrollemnts due to server error"
+            )
+
+    async def update_user_enrollment(self,courseId: str, uuid: str, enrollmentData: EnrollmentUpdate):
+        try:
+            return await self._service.update_user_enrollment(uuid,courseId,enrollmentData)
+        except HTTPException:
+            raise
+        except Exception:
+            raise HTTPException(status_code=500, detail="Server error updating lock status")
+  
