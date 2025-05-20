@@ -1,7 +1,7 @@
 services:
-  mongo:
+  db_admins:
+    container_name: db_admins
     image: mongo:6.0
-    container_name: mongo
     restart: always
     networks:
       - my-network
@@ -18,12 +18,12 @@ services:
     ports:
       - 3004:3004
     environment:
-      - DB_URI=mongodb://mongo:27017
+      - DB_URI=mongodb://db_admins:27017
       - DB_NAME=backoffice
       - ADMIN_TOKEN=admin-token
       - GATEWAY_URL=http://gateway:3000
     depends_on:
-      - mongo
+      - db_admins
 
   # prometheus:
   #   image: prom/prometheus
