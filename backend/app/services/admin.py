@@ -3,18 +3,20 @@ from app.databases.db import DB
 from app.exceptions.username_or_email import UsernameEmailInUser
 from app.models.admin import AdminCreate, AdminOut, AdminLogin, Token
 from app.models.users import UserOut, EnrollmentUsers, Enrollment, EnrollmentUpdate
+from app.services.service import Service
 import bcrypt
 from fastapi import HTTPException
 from datetime import datetime, timedelta
 import jwt
 import requests
+import logging
 
 SECRET_KEY = "secret"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
-class AdminService:
+class AdminService(Service):
     def __init__(self, db: DB, admin_token: str, gateway_url: str):
         self._db = db
         self._admin_coll = "admins"
@@ -26,15 +28,15 @@ class AdminService:
         hashed = bcrypt.hashpw(password.encode(), salt)
         return hashed.decode()
 
-    async def create_admin(self, admin_data: AdminCreate) -> AdminOut:
+    async def create_admin(self, data: AdminCreate) -> AdminOut:
         existing = await self._db.exists_with_username_email(
-            self._admin_coll, admin_data.username, admin_data.email
+            self._admin_coll, data.username, data.email
         )
         if existing:
             raise UsernameEmailInUser()
 
-        hashed_password = self.hash_password(admin_data.password)
-        admin_dict = admin_data.model_dump()
+        hashed_password = self.hash_password(data.password)
+        admin_dict = data.model_dump()
         admin_dict["password"] = hashed_password
         admin_dict["registration_date"] = datetime.utcnow().isoformat() + "Z"
 
@@ -59,14 +61,14 @@ class AdminService:
         data.update({"exp": expire})
         return jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
 
-    async def login_admin(self, login_data: AdminLogin) -> Token:
+    async def login_admin(self, credentials: AdminLogin) -> Token:
         admin = await self._db.find_one_by_filter(
-            self._admin_coll, {"email": login_data.email}
+            self._admin_coll, {"email": credentials.email}
         )
         if not admin:
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
-        if not self.verify_password(login_data.password, admin["password"]):
+        if not self.verify_password(credentials.password, admin["password"]):
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
         token = self.create_token({"sub": str(admin["id"]), "email": admin["email"]})
@@ -80,26 +82,24 @@ class AdminService:
             res = requests.get(url, headers=headers, timeout=5)
             res.raise_for_status()
             return [UserOut(**user) for user in res.json()]
-        except requests.exceptions.RequestException as e:
+        except Exception:
             raise HTTPException(
                 status_code=502, detail="Failed to connect to users service"
             )
 
-    async def get_all_users_enrollment(self) ->  list[Enrollment]:
+    async def get_all_users_enrollment(self) -> list[Enrollment]:
         url = f"{self._gateway_url}/admin-backend/courses/enrollments"
         headers = {"Authorization": f"Bearer {self._admin_token}"}
 
         try:
             res = requests.get(url, headers=headers, timeout=5)
             res.raise_for_status()
-            data = res.json()  
-            print(data)
+            data = res.json()
             return EnrollmentUsers(**data).data
-        except requests.exceptions.RequestException:
+        except Exception:
             raise HTTPException(
                 status_code=502, detail="Failed to connect to education service"
             )
-
 
     async def update_user_lock_status(self, uuid: str, locked: bool):
         url = f"{self._gateway_url}/admin-backend/users/{uuid}/lock-status"
@@ -109,11 +109,16 @@ class AdminService:
         try:
             res = requests.patch(url, json=data, headers=headers, timeout=5)
             res.raise_for_status()
+            logging.info("blocked" * locked + "unblocked" * locked + f" user {uuid}")
             return res.json()
-        except requests.exceptions.RequestException:
-            raise HTTPException(status_code=502, detail="Failed to connect to users service")
+        except Exception:
+            raise HTTPException(
+                status_code=502, detail="Failed to connect to users service"
+            )
 
-    async def update_user_enrollment(self,courseId: str, uuid: str, enrollmentData: EnrollmentUpdate):
+    async def update_user_enrollment(
+        self, courseId: str, uuid: str, enrollmentData: EnrollmentUpdate
+    ):
         url = f"{self._gateway_url}/admin-backend/courses/{courseId}/enrollments/{uuid}"
         headers = {"Authorization": f"Bearer {self._admin_token}"}
         data = {"role": enrollmentData.role}
@@ -121,6 +126,11 @@ class AdminService:
         try:
             res = requests.patch(url, json=data, headers=headers, timeout=5)
             res.raise_for_status()
+            logging.info(
+                f"updated role for user {uuid} to {enrollmentData.role} at course {courseId}"
+            )
             return res.json()
-        except requests.exceptions.RequestException:
-            raise HTTPException(status_code=502, detail="Failed to connect to education service")
+        except Exception:
+            raise HTTPException(
+                status_code=502, detail="Failed to connect to education service"
+            )

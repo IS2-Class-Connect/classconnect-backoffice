@@ -1,21 +1,26 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
 import '../styles/UserList.css';
+import { toast } from 'react-toastify';
+
 interface Course {
   id: string;
   title: string;
 }
+
 interface Enrollment {
   userId: string;
   role: string;
   course: Course;
 }
+
 interface User {
   uuid: string;
   name: string;
   email: string;
   enrollments: Enrollment[];
 }
+
 const UserList = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [admins, setAdmins] = useState<any[]>([]);
@@ -39,7 +44,7 @@ const UserList = () => {
           enrollmentsMap.get(userId).push({ role, course });
         });
 
-        const usersWithEnrollments = users.map((user: User)=> ({
+        const usersWithEnrollments = users.map((user: User) => ({
           ...user,
           enrollments: enrollmentsMap.get(user.uuid) || [],
         }));
@@ -58,21 +63,34 @@ const UserList = () => {
   const updateUserLockStatus = async (uuid: string, locked: boolean) => {
     try {
       await api.patch(`/admins/users/${uuid}/lock-status`, { locked });
+      let username = "";
+
       setUsers((prevUsers: any[]) =>
-        prevUsers.map((user) =>
-          user.uuid === uuid ? { ...user, accountLockedByAdmins: locked } : user
+        prevUsers.map((user) => {
+          if (user.uuid === uuid) {
+            username = user.name;
+            return { ...user, accountLockedByAdmins: locked };
+          }
+          return user;
+        }
         )
       );
+
+      toast.info(`${locked ? "Blocked" : "Unblocked"} user ${username}`)
     } catch (error) {
       console.error(`Failed to ${locked ? 'block' : 'unblock'} user:`, error);
+      toast.error(`Failed to ${locked ? "block" : "unblock"} user`);
     }
   };
 
   const updateUserRole = async (uuid: string, courseId: string, newRole: string) => {
     try {
       await api.patch(`/admins/courses/${courseId}/enrollments/${uuid}`, { role: newRole });
+      let userMap = new Map();
+
       setUsers((prevUsers) =>
         prevUsers.map((user) => {
+          userMap.set(user.uuid, user);
           if (user.uuid === uuid) {
             return {
               ...user,
@@ -86,11 +104,13 @@ const UserList = () => {
           return user;
         })
       );
-    alert("Updated role");
-  } catch (error) {
-    console.error("Error updating user role:", error);
-    alert("Error updating user role");
-  }
+
+      const username = userMap.get(uuid).name;
+      toast.success(`Updated role for ${username} to ${newRole.toLowerCase()}!`)
+    } catch (error) {
+      console.error("Error updating user role:", error);
+      toast.error("Error updating user role")
+    }
   };
 
   const formatActiveness = (isBlocked: boolean) => {

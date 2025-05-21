@@ -1,99 +1,58 @@
 from fastapi import HTTPException
 from app.exceptions.username_or_email import UsernameEmailInUser
 from app.models.admin import AdminCreate, AdminOut, AdminLogin, Token
-from app.models.users import UserOut, EnrollmentUsers, Enrollment, EnrollmentUpdate
-from app.services.admin import AdminService
+from app.models.users import UserOut, Enrollment, EnrollmentUpdate
+from app.services.service import Service
 
 
 class AdminController:
-    def __init__(self, service: AdminService):
+    def __init__(self, service: Service):
         self._service = service
 
     async def create_admin(self, admin: AdminCreate) -> AdminOut:
         try:
             created_admin = await self._service.create_admin(admin)
-            print(created_admin)
             return created_admin
         except UsernameEmailInUser as e:
             raise HTTPException(status_code=409, detail=str(e))
-        except Exception:
-            raise HTTPException(
-                status_code=500, detail="Failed to create admin due to server error"
-            )
 
     async def get_admin(self, id: str) -> AdminOut:
         try:
             admin = await self._service.get_admin(id)
         except ValueError as e:
             raise HTTPException(status_code=400, detail=str(e))
-        except Exception:
-            raise HTTPException(
-                status_code=500, detail="Failed to retrieve admin due to server error"
-            )
         if admin is None:
             raise HTTPException(status_code=404, detail="Admin not found")
 
         return admin
 
     async def get_all_admins(self) -> list[AdminOut]:
-        try:
-            return await self._service.get_all_admins()
-        except Exception:
-            raise HTTPException(
-                status_code=500, detail="Failed to get all admins due to server error"
-            )
+        return await self._service.get_all_admins()
 
     async def delete_admin(self, id: str):
         try:
             found = await self._service.delete_admin(id)
         except ValueError as e:
             raise HTTPException(status_code=400, detail=str(e))
-        except Exception:
-            raise HTTPException(
-                status_code=500, detail="Failed to delete admin due to server error"
-            )
+
         if not found:
             raise HTTPException(status_code=404, detail="Admin not found")
 
     async def login(self, login_data: AdminLogin) -> Token:
-        try:
-            return await self._service.login_admin(login_data)
-        except HTTPException as e:
-            raise e
-        except Exception:
-            raise HTTPException(status_code=500, detail="Server error during login")
+        return await self._service.login_admin(login_data)
 
     async def get_all_users(self) -> list[UserOut]:
-        try:
-            return await self._service.get_all_users()
-        except HTTPException:
-            raise
-        except Exception:
-            raise HTTPException(
-                status_code=500, detail="Server error during get all users"
-            )
+        return await self._service.get_all_users()
 
     async def update_user_lock_status(self, uuid: str, locked: bool):
-        try:
-            return await self._service.update_user_lock_status(uuid, locked)
-        except HTTPException:
-            raise
-        except Exception:
-            raise HTTPException(status_code=500, detail="Server error updating lock status")
-  
-    async def get_all_users_enrollment(self) ->  list[Enrollment]:
-        try:
-            return await self._service.get_all_users_enrollment()
-        except Exception:
-            raise HTTPException(
-                status_code=500, detail="Failed to get all users enrollemnts due to server error"
-            )
+        return await self._service.update_user_lock_status(uuid, locked)
 
-    async def update_user_enrollment(self,courseId: str, uuid: str, enrollmentData: EnrollmentUpdate):
-        try:
-            return await self._service.update_user_enrollment(uuid,courseId,enrollmentData)
-        except HTTPException:
-            raise
-        except Exception:
-            raise HTTPException(status_code=500, detail="Server error updating lock status")
-  
+    async def get_all_users_enrollment(self) -> list[Enrollment]:
+        return await self._service.get_all_users_enrollment()
+
+    async def update_user_enrollment(
+        self, courseId: str, uuid: str, enrollmentData: EnrollmentUpdate
+    ):
+        return await self._service.update_user_enrollment(
+            uuid, courseId, enrollmentData
+        )
