@@ -36,8 +36,8 @@ async def lifespan(app: FastAPI):
     if not DB_NAME:
         raise ValueError("No database name was provided")
 
-    ADMIN_TOKEN = os.getenv("ADMIN_TOKEN")
-    if not ADMIN_TOKEN:
+    GATEWAY_TOKEN = os.getenv("GATEWAY_TOKEN")
+    if not GATEWAY_TOKEN:
         raise ValueError("No admin token was provided")
 
     GATEWAY_URL = os.getenv("GATEWAY_URL")
@@ -49,7 +49,7 @@ async def lifespan(app: FastAPI):
     except:
         raise RuntimeError("couldn't connect to db")
 
-    service = AdminService(db, ADMIN_TOKEN, GATEWAY_URL)
+    service = AdminService(db, GATEWAY_TOKEN, GATEWAY_URL)
     controller = AdminController(service)
     admin_router = AdminRouter(controller)
     app.include_router(admin_router.router)

@@ -21,7 +21,7 @@ services:
       - PYTHONUNBUFFERED=1
       - DB_URI=mongodb://db_admins:27017
       - DB_NAME=backoffice
-      - ADMIN_TOKEN=admin-token
+      - GATEWAY_TOKEN=gateway-token
       - GATEWAY_URL=http://gateway:3000
     depends_on:
       - db_admins
