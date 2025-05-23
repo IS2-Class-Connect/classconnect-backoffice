@@ -17,10 +17,10 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
 class AdminService(Service):
-    def __init__(self, db: DB, admin_token: str, gateway_url: str):
+    def __init__(self, db: DB, gateway_token: str, gateway_url: str):
         self._db = db
         self._admin_coll = "admins"
-        self._admin_token = admin_token
+        self._gateway_token = gateway_token
         self._gateway_url = gateway_url
 
     def hash_password(self, password: str) -> str:
@@ -76,7 +76,7 @@ class AdminService(Service):
 
     async def get_all_users(self) -> list[UserOut]:
         url = f"{self._gateway_url}/admin-backend/users"
-        headers = {"Authorization": f"Bearer {self._admin_token}"}
+        headers = {"Authorization": f"Bearer {self._gateway_token}"}
 
         try:
             res = requests.get(url, headers=headers, timeout=5)
@@ -89,7 +89,7 @@ class AdminService(Service):
 
     async def get_all_users_enrollment(self) -> list[Enrollment]:
         url = f"{self._gateway_url}/admin-backend/courses/enrollments"
-        headers = {"Authorization": f"Bearer {self._admin_token}"}
+        headers = {"Authorization": f"Bearer {self._gateway_token}"}
 
         try:
             res = requests.get(url, headers=headers, timeout=5)
@@ -103,7 +103,7 @@ class AdminService(Service):
 
     async def update_user_lock_status(self, uuid: str, locked: bool):
         url = f"{self._gateway_url}/admin-backend/users/{uuid}/lock-status"
-        headers = {"Authorization": f"Bearer {self._admin_token}"}
+        headers = {"Authorization": f"Bearer {self._gateway_token}"}
         data = {"locked": locked}
 
         try:
@@ -120,7 +120,7 @@ class AdminService(Service):
         self, courseId: str, uuid: str, enrollmentData: EnrollmentUpdate
     ):
         url = f"{self._gateway_url}/admin-backend/courses/{courseId}/enrollments/{uuid}"
-        headers = {"Authorization": f"Bearer {self._admin_token}"}
+        headers = {"Authorization": f"Bearer {self._gateway_token}"}
         data = {"role": enrollmentData.role}
 
         try:
