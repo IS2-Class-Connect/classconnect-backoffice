@@ -48,7 +48,9 @@ class AdminService(Service):
         return AdminOut(**admin) if admin else None
 
     async def get_all_admins(self) -> list[AdminOut]:
-        return [AdminOut(**admin) for admin in await self._db.get_all(self._admin_coll)]
+        return [
+            AdminOut(**admin) for admin in (await self._db.get_all(self._admin_coll))
+        ]
 
     async def delete_admin(self, id: str):
         return await self._db.delete(self._admin_coll, id)
