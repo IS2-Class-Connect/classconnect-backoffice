@@ -48,7 +48,9 @@ class AdminService(Service):
         return AdminOut(**admin) if admin else None
 
     async def get_all_admins(self) -> list[AdminOut]:
-        return [AdminOut(**admin) for admin in await self._db.get_all(self._admin_coll)]
+        return [
+            AdminOut(**admin) for admin in (await self._db.get_all(self._admin_coll))
+        ]
 
     async def delete_admin(self, id: str):
         return await self._db.delete(self._admin_coll, id)
@@ -66,11 +68,15 @@ class AdminService(Service):
             self._admin_coll, {"email": credentials.email}
         )
         if not admin:
+            print(f"no encontre nada")
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
+        print(f"encontre al admin por email: {admin}")
         if not self.verify_password(credentials.password, admin["password"]):
+            print("me dio mal el hash de la contraseña")
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
+        print("creo el token")
         token = self.create_token({"sub": str(admin["id"]), "email": admin["email"]})
         return Token(access_token=token)
 

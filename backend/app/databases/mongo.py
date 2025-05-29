@@ -26,7 +26,7 @@ class MongoDB(DB):
     # Wrapper to run queries and wrap Exceptions as HttpExceptions
     async def _try(self, f) -> Any:
         try:
-            await f()
+            return await f()
         except Exception as e:
             raise HTTPException(500, str(e))
 
