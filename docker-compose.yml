@@ -1,68 +1,69 @@
-version: '3.8'
 services:
   db_admins:
     container_name: db_admins
     image: mongo:6.0
     restart: always
+    volumes:
+      - mongo_data:/data/db
     networks:
       - my-network
     ports:
       - 27017:27017
-    volumes:
-      - mongo_data:/data/db
 
   admins:
     container_name: admins
     build: .
-    networks:
-      - my-network
-    ports:
-      - 3004:3004
     environment:
       - PYTHONUNBUFFERED=1
       - DB_URI=mongodb://db_admins:27017
       - DB_NAME=backoffice
       - GATEWAY_TOKEN=gateway-token
       - GATEWAY_URL=http://gateway:3000
+    networks:
+      - my-network
+    ports:
+      - 3004:3004
     depends_on:
       - db_admins
 
   frontend:
     container_name: frontend
     build: ./frontend
-    ports:
-      - "5173:5173" 
     networks:
-      - monitor-net
+      - my-network
+    ports:
+      - 5173:5173 
 
-  prometheus-main:
+  prometheus:
+    container_name: prometheus
     image: prom/prometheus
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml
-    ports:
-      - "9095:9090"
     networks:
-      - monitor-net
+      - my-network
+    ports:
+      - 9095:9090
 
   grafana:
+    container_name: grafana
     image: grafana/grafana
-    ports:
-      - "3006:3000"
     volumes:
     - ./grafana/grafana.ini:/etc/grafana/grafana.ini
     networks:
-      - monitor-net
+      - my-network
+    ports:
+      - 3006:3000
 
   alertmanager:
-    image: prom/alertmanager
     container_name: alertmanager
-    ports:
-      - "9094:9094"
+    image: prom/alertmanager
     volumes:
       - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
     networks:
-      - monitor-net
+      - my-network
+    ports:
+      - 9094:9094
 
 volumes:
   mongo_data:
