@@ -10,7 +10,7 @@ curl -X 'POST' \
   -H 'Content-Type: application/json' \
   -d "{
     \"username\": \"$1\",
-    \"email\": \"$1@example.com\",
-    \"password\": \"securepassword\"
+    \"email\": \"$1@backoffice.com\",
+    \"password\": \"12345678\"
   }"
 

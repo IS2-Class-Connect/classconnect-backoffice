@@ -9,6 +9,7 @@ groups:
         annotations:
           summary: "High latency detected"
           description: "The 95th percentile latency is above 0.5 seconds for the last 5 minutes."
+
   - name: service_availability
     rules:
       - alert: ServiceDown

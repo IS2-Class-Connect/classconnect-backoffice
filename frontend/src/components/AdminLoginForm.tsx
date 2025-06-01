@@ -3,7 +3,7 @@ import api from '../api/axios';
 import '../styles/LoginForm.css'; 
 import { useNavigate } from 'react-router-dom';
 
-function AdminLoginForm() {
+export default function AdminLoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -58,5 +58,3 @@ function AdminLoginForm() {
     </div>
   );
 }
-
-export default AdminLoginForm;
