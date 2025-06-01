@@ -1,6 +1,3 @@
 class UsernameEmailInUser(Exception):
-    def __init__(self, message: str | None = None):
-        base = "Username or email already exists"
-        if message:
-            base += f": {message}"
-        super().__init__(base)
+    def __init__(self):
+        super().__init__("Username or email already exists")

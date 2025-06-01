@@ -1,28 +1,31 @@
 version: '3.8'
 services:
-  mongo:
+  db_admins:
+    container_name: db_admins
     image: mongo:6.0
-    container_name: mongo
     restart: always
+    networks:
+      - my-network
     ports:
-      - "27017:27017"
+      - 27017:27017
     volumes:
       - mongo_data:/data/db
-    networks:
-      - monitor-net
 
-  backend:
-    container_name: backend
-    build: ./backend
-    ports:
-      - "3004:3004"
+  admins:
+    container_name: admins
+    build: .
     networks:
-      - monitor-net
+      - my-network
+    ports:
+      - 3004:3004
     environment:
-      - DB_URI=mongodb://mongo:27017
+      - PYTHONUNBUFFERED=1
+      - DB_URI=mongodb://db_admins:27017
       - DB_NAME=backoffice
+      - GATEWAY_TOKEN=gateway-token
+      - GATEWAY_URL=http://gateway:3000
     depends_on:
-      - mongo
+      - db_admins
 
   frontend:
     container_name: frontend
@@ -65,6 +68,6 @@ volumes:
   mongo_data:
 
 networks:
-  monitor-net:
-    external: 
-      name: classconnect_net
+  my-network:
+    name: classconnect_net
+    external: true

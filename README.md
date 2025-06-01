@@ -130,3 +130,7 @@ classconnect-backoffice/
 ## ✍️ License
 
 MIT License.
+
+## Codecov
+
+[![codecov](https://codecov.io/gh/IS2-Class-Connect/classconnect-backoffice/graph/badge.svg?token=6QwXr8HFIm)](https://codecov.io/gh/IS2-Class-Connect/classconnect-backoffice)
