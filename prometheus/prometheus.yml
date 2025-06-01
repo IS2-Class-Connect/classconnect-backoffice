@@ -3,14 +3,17 @@ global:
 
 scrape_configs:
   - job_name: 'users-service'
+    metrics_path: '/users/metrics'
     static_configs:
-      - targets: ['users:3001']
+      - targets: ['gateway:3000']
   - job_name: 'education-service'
+    metrics_path: '/education/metrics'
     static_configs:
-      - targets: ['education:3002']
+      - targets: ['gateway:3000']
   - job_name: 'admins-service'
+    metrics_path: '/admins/metrics'
     static_configs:
-      - targets: ['admins:3004']
+      - targets: ['gateway:3000']
 
 alerting:
   alertmanagers:
