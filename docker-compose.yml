@@ -59,6 +59,7 @@ services:
 
 volumes:
   mongo_data:
+    name: db_admins
 
 networks:
   my-network:
