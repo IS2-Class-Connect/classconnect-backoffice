@@ -4,13 +4,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.databases.mongo import MongoDB
 from app.services.admin import AdminService
 from app.controllers.admin import AdminController
-from app.routers.admin import AdminRouter
+from app.routers.admin import AdminRouter, registry
 from prometheus_client import (
     Counter,
     Histogram,
-    CollectorRegistry,
-    PlatformCollector,
-    ProcessCollector,
     Gauge,
 )
 import psutil
@@ -19,28 +16,37 @@ import logging
 import os
 import time
 
-CPU_USAGE = Gauge("cpu_usage_percent", "CPU usage percentage")
-MEMORY_USAGE = Gauge("memory_usage_bytes", "Memory usage in bytes")
+# Prometheus Initialization
+CPU_USAGE = Gauge(
+    "cpu_usage_percent",
+    "CPU usage percentage",
+    registry=registry,
+)
+MEMORY_USAGE = Gauge(
+    "memory_usage_bytes",
+    "Memory usage in bytes",
+    registry=registry,
+)
 REQUEST_COUNT = Counter(
-    "http_requests_total", "Total HTTP requests", ["method", "endpoint", "http_status"]
+    "http_requests_total",
+    "Total HTTP requests",
+    ["method", "endpoint", "http_status"],
+    registry=registry,
 )
 REQUEST_LATENCY = Histogram(
-    "http_request_duration_seconds", "HTTP request latency", ["method", "endpoint"]
+    "http_request_duration_seconds",
+    "HTTP request latency",
+    ["method", "endpoint"],
+    registry=registry,
 )
-
-# Use a custom registry to include default collectors
-registry = CollectorRegistry()
-PlatformCollector(registry=registry)
-ProcessCollector(registry=registry)
 
 
 # Resource usage tracking
 def track_usage():
     process = psutil.Process(os.getpid())
     while True:
-        CPU_USAGE.set(process.cpu_percent(interval=1))
-        MEMORY_USAGE.set(process.memory_info().rss)  # Resident Set Size (RSS) in bytes
-        time.sleep(1)
+        CPU_USAGE.set(process.cpu_percent(interval=5.0))
+        MEMORY_USAGE.set(process.memory_info().rss)
 
 
 def initialize_log(logging_level):
@@ -87,7 +93,7 @@ async def lifespan(app: FastAPI):
     admin_router = AdminRouter(controller)
     app.include_router(admin_router.router)
     initialize_log(logging.INFO)
-    threading.Thread(target=track_usage, daemon=True)
+    threading.Thread(target=track_usage, daemon=True).start()
 
     yield
 
@@ -111,7 +117,7 @@ async def prometheus_middleware(request: Request, call_next):
     ).inc()
 
     REQUEST_LATENCY.labels(method=request.method, endpoint=request.url.path).observe(
-        process_time
+        process_time,
     )
 
     return response

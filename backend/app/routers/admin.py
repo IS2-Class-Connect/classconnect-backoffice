@@ -7,8 +7,16 @@ from app.models.admin import LockStatusUpdate
 from prometheus_client import (
     generate_latest,
     CONTENT_TYPE_LATEST,
+    CollectorRegistry,
+    PlatformCollector,
+    ProcessCollector,
 )
 import logging
+
+# Use a custom registry to include default collectors
+registry = CollectorRegistry()
+PlatformCollector(registry=registry)
+ProcessCollector(registry=registry)
 
 
 class AdminRouter:
@@ -77,4 +85,6 @@ class AdminRouter:
 
     async def metrics(self):
         logging.info("Trying to get metrics")
-        return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
+        return Response(
+            content=generate_latest(registry), media_type=CONTENT_TYPE_LATEST
+        )

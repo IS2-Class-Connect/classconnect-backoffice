@@ -2,18 +2,18 @@ global:
   scrape_interval: 15s
 
 scrape_configs:
-  - job_name: 'users-service'
+  - job_name: 'users'
     metrics_path: '/users/metrics'
     static_configs:
-      - targets: ['gateway:3000']
-  - job_name: 'education-service'
+      - targets: ['users:3001']
+  - job_name: 'education'
     metrics_path: '/education/metrics'
     static_configs:
-      - targets: ['gateway:3000']
-  - job_name: 'admins-service'
+      - targets: ['education:3002']
+  - job_name: 'admins'
     metrics_path: '/admins/metrics'
     static_configs:
-      - targets: ['gateway:3000']
+      - targets: ['admins:3004']
 
 alerting:
   alertmanagers:
