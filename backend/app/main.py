@@ -4,49 +4,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.databases.mongo import MongoDB
 from app.services.admin import AdminService
 from app.controllers.admin import AdminController
-from app.routers.admin import AdminRouter, registry
-from prometheus_client import (
-    Counter,
-    Histogram,
-    Gauge,
-)
-import psutil
-import threading
+from app.routers.admin import AdminRouter
+from app.controllers.metrics import REQUEST_COUNT, REQUEST_LATENCY
 import logging
 import os
 import time
-
-# Prometheus Initialization
-CPU_USAGE = Gauge(
-    "cpu_usage_percent",
-    "CPU usage percentage",
-    registry=registry,
-)
-MEMORY_USAGE = Gauge(
-    "memory_usage_bytes",
-    "Memory usage in bytes",
-    registry=registry,
-)
-REQUEST_COUNT = Counter(
-    "http_requests_total",
-    "Total HTTP requests",
-    ["method", "endpoint", "http_status"],
-    registry=registry,
-)
-REQUEST_LATENCY = Histogram(
-    "http_request_duration_seconds",
-    "HTTP request latency",
-    ["method", "endpoint"],
-    registry=registry,
-)
-
-
-# Resource usage tracking
-def track_usage():
-    process = psutil.Process(os.getpid())
-    while True:
-        CPU_USAGE.set(process.cpu_percent(interval=5.0))
-        MEMORY_USAGE.set(process.memory_info().rss)
 
 
 def initialize_log(logging_level):
@@ -93,7 +55,6 @@ async def lifespan(app: FastAPI):
     admin_router = AdminRouter(controller)
     app.include_router(admin_router.router)
     initialize_log(logging.INFO)
-    threading.Thread(target=track_usage, daemon=True).start()
 
     yield
 

@@ -1,31 +1,20 @@
 from fastapi import APIRouter
-from fastapi.responses import Response
 from app.controllers.admin import AdminController
+from app.controllers.metrics import MetricsController
 from app.models.admin import AdminCreate, AdminOut, AdminLogin, Token
 from app.models.users import UserOut, Enrollment, EnrollmentUpdate
 from app.models.admin import LockStatusUpdate
-from prometheus_client import (
-    generate_latest,
-    CONTENT_TYPE_LATEST,
-    CollectorRegistry,
-    PlatformCollector,
-    ProcessCollector,
-)
 import logging
-
-# Use a custom registry to include default collectors
-registry = CollectorRegistry()
-PlatformCollector(registry=registry)
-ProcessCollector(registry=registry)
 
 
 class AdminRouter:
     def __init__(self, controller: AdminController):
         self._controller = controller
+        self._metrics_controller = MetricsController()
         self.router = APIRouter(prefix="/admins", tags=["admins"])
 
+        self.router.get("/metrics")(self.get_metrics)
         self.router.get("/users", response_model=list[UserOut])(self.get_all_users)
-        self.router.get("/metrics")(self.metrics)
         self.router.get("", response_model=list[AdminOut])(self.get_all_admins)
         self.router.get("/{id}", response_model=AdminOut)(self.get_admin)
         self.router.get("/courses/enrollments", response_model=list[Enrollment])(
@@ -83,8 +72,6 @@ class AdminRouter:
             uuid, courseId, enrollmentData
         )
 
-    async def metrics(self):
+    async def get_metrics(self):
         logging.info("Trying to get metrics")
-        return Response(
-            content=generate_latest(registry), media_type=CONTENT_TYPE_LATEST
-        )
+        return self._metrics_controller.get_metrics()
