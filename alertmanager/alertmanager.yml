@@ -1,0 +1,14 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: "mail alert"
+
+receivers:
+  - name: "mail alert"
+    email_configs:
+      - smarthost: "smtp.gmail.com:587"  # Replace with your email
+        from: "classconnect.team.uba@gmail.com"
+        to: "classconnect.team.uba@gmail.com" 
+        auth_username: "mlaurito@fi.uba.ar"
+        auth_password: "zzme fljz tujd dhsx"

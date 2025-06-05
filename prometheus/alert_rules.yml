@@ -1,0 +1,22 @@
+groups:
+  - name: latency_alerts
+    rules:
+      - alert: HighLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 0.5
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High latency detected"
+          description: "The 95th percentile latency is above 0.5 seconds for the last 5 minutes."
+
+  - name: service_availability
+    rules:
+      - alert: ServiceDown
+        expr: up{job=~"users-service|backend-service|education-service"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service is down"
+          description: "The {{ $labels.job }} service has not beeb responding for the last minute."

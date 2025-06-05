@@ -1,12 +1,14 @@
 from contextlib import asynccontextmanager
-import os
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from app.databases.mongo import MongoDB
 from app.services.admin import AdminService
 from app.controllers.admin import AdminController
 from app.routers.admin import AdminRouter
+from app.controllers.metrics import REQUEST_COUNT, REQUEST_LATENCY
 import logging
+import os
+import time
 
 
 def initialize_log(logging_level):
@@ -27,7 +29,6 @@ def initialize_log(logging_level):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-
     DB_URI = os.getenv("DB_URI")
     if not DB_URI:
         raise ValueError("No database URI was provided")
@@ -38,7 +39,7 @@ async def lifespan(app: FastAPI):
 
     GATEWAY_TOKEN = os.getenv("GATEWAY_TOKEN")
     if not GATEWAY_TOKEN:
-        raise ValueError("No admin token was provided")
+        raise ValueError("No gateway token was provided")
 
     GATEWAY_URL = os.getenv("GATEWAY_URL")
     if not GATEWAY_URL:
@@ -61,6 +62,27 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+
+@app.middleware("http")
+async def prometheus_middleware(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+
+    # Update metrics
+    REQUEST_COUNT.labels(
+        method=request.method,
+        endpoint=request.url.path,
+        http_status=response.status_code,
+    ).inc()
+
+    REQUEST_LATENCY.labels(method=request.method, endpoint=request.url.path).observe(
+        process_time,
+    )
+
+    return response
+
 
 # Enable CORS
 app.add_middleware(

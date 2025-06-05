@@ -19,6 +19,9 @@ pytest
 pytest-asyncio
 httpx
 PyJWT
+psutil
+typing_inspect
+fastapi-utils
 requests
 coverage
 pytest-cov
