@@ -14,7 +14,6 @@ services:
     container_name: admins
     build: .
     environment:
-      - PYTHONUNBUFFERED=1
       - DB_URI=mongodb://db_admins:27017
       - DB_NAME=backoffice
       - GATEWAY_TOKEN=gateway-token
@@ -25,37 +24,6 @@ services:
       - 3004:3004
     depends_on:
       - db_admins
-
-  prometheus:
-    container_name: prometheus
-    image: prom/prometheus
-    volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml
-    networks:
-      - my-network
-    ports:
-      - 9095:9090
-
-  grafana:
-    container_name: grafana
-    image: grafana/grafana
-    volumes:
-    - ./grafana/grafana.ini:/etc/grafana/grafana.ini
-    networks:
-      - my-network
-    ports:
-      - 3006:3000
-
-  alertmanager:
-    container_name: alertmanager
-    image: prom/alertmanager
-    volumes:
-      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
-    networks:
-      - my-network
-    ports:
-      - 9094:9094
 
 volumes:
   mongo_data:

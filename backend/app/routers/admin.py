@@ -73,5 +73,4 @@ class AdminRouter:
         )
 
     async def get_metrics(self):
-        logging.info("Trying to get metrics")
         return self._metrics_controller.get_metrics()

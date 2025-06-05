@@ -11,7 +11,6 @@ from prometheus_client import (
     Histogram,
 )
 import threading
-import logging
 import psutil
 import os
 
@@ -58,7 +57,6 @@ class MetricsController:
         threading.Thread(target=track_usage, daemon=True).start()
 
     def get_metrics(self):
-        logging.info("Trying to get metrics")
         return Response(
             content=generate_latest(registry), media_type=CONTENT_TYPE_LATEST
         )
