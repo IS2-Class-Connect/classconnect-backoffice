@@ -111,7 +111,8 @@ class AdminService(Service):
         try:
             res = requests.patch(url, json=data, headers=headers, timeout=5)
             res.raise_for_status()
-            logging.info("blocked" * locked + "unblocked" * locked + f" user {uuid}")
+            status = "locked" if locked else "unlocked"
+            logging.info(f"{status} user {uuid}")
             return res.json()
         except Exception:
             raise HTTPException(

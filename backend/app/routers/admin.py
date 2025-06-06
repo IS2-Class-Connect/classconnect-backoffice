@@ -59,9 +59,8 @@ class AdminRouter:
         return await self._controller.get_all_users_enrollment()
 
     async def update_user_lock_status(self, uuid: str, payload: LockStatusUpdate):
-        logging.info(
-            f"Trying to update user status for user {uuid} to {payload.locked}"
-        )
+        status = "locked" if payload.locked else "unlocked"
+        logging.info(f"Trying to update user status for user {uuid} to {status}")
         return await self._controller.update_user_lock_status(uuid, payload.locked)
 
     async def update_user_enrollment(
