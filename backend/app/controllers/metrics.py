@@ -58,5 +58,7 @@ class MetricsController:
 
     def get_metrics(self):
         return Response(
-            content=generate_latest(registry), media_type=CONTENT_TYPE_LATEST
+            status_code=200,
+            content=generate_latest(registry),
+            media_type=CONTENT_TYPE_LATEST,
         )
