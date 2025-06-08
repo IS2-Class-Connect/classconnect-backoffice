@@ -2,6 +2,12 @@ import { useEffect, useState } from 'react';
 import api from '../api/axios';
 import '../styles/UserList.css';
 import { toast } from 'react-toastify';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import Button from '@mui/material/Button';
 
 interface Course {
   id: string;
@@ -24,6 +30,19 @@ interface User {
 const UserList = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [admins, setAdmins] = useState<any[]>([]);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    onCancel: () => void;
+  }>({
+    open: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+    onCancel: () => {},
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -62,21 +81,28 @@ const UserList = () => {
 
   const updateUserLockStatus = async (uuid: string, locked: boolean) => {
     try {
-      await api.patch(`/admins/users/${uuid}/lock-status`, { locked });
-      let username = "";
+      const username = users.find((user) => user.uuid === uuid)?.name || '';
+      const action = locked ? "block" : "unblock";
+      setConfirmDialog({
+        open: true,
+        title: 'Confirm Action',
+        message: `Are you sure you want to ${action} user ${username}?`,
+        onConfirm: async () => {
+          setConfirmDialog((prev) => ({ ...prev, open: false }));
+          await api.patch(`/admins/users/${uuid}/lock-status`, { locked });
 
-      setUsers((prevUsers: any[]) =>
-        prevUsers.map((user) => {
-          if (user.uuid === uuid) {
-            username = user.name;
-            return { ...user, accountLockedByAdmins: locked };
-          }
-          return user;
-        }
-        )
-      );
+          setUsers((prevUsers: any[]) => prevUsers.map(
+            (user) => {
+              return user.uuid === uuid ? { ...user, accountLockedByAdmins: locked } : user;
+            }
+          ));
 
-      toast.info(`${locked ? "Blocked" : "Unblocked"} user ${username}`)
+          toast.info(`${locked ? "Blocked" : "Unblocked"} user ${username}`)
+        },
+        onCancel: () => {
+          setConfirmDialog((prev) => ({ ...prev, open: false }));
+        },
+      });
     } catch (error) {
       console.error(`Failed to ${locked ? 'block' : 'unblock'} user:`, error);
       toast.error(`Failed to ${locked ? "block" : "unblock"} user`);
@@ -86,11 +112,14 @@ const UserList = () => {
   const updateUserRole = async (uuid: string, courseId: string, newRole: string) => {
     try {
       await api.patch(`/admins/courses/${courseId}/enrollments/${uuid}`, { role: newRole });
-      let userMap = new Map();
+      const username = users.find((user) => user.uuid === uuid)?.name || '';
+
+      if (!window.confirm(`Are you sure you want to change the role of ${username} to ${newRole.toLowerCase()}?`)) {
+        return;
+      }
 
       setUsers((prevUsers) =>
         prevUsers.map((user) => {
-          userMap.set(user.uuid, user);
           if (user.uuid === uuid) {
             return {
               ...user,
@@ -105,7 +134,6 @@ const UserList = () => {
         })
       );
 
-      const username = userMap.get(uuid).name;
       toast.success(`Updated role for ${username} to ${newRole.toLowerCase()}!`)
     } catch (error) {
       console.error("Error updating user role:", error);
@@ -196,8 +224,39 @@ const UserList = () => {
           ))}
         </tbody>
       </table>
+
+      <ConfirmDialog
+        open={confirmDialog.open}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        onConfirm={confirmDialog.onConfirm}
+        onCancel={confirmDialog.onCancel}
+      />
     </div>
   );
 };
+
+export function ConfirmDialog({ open, title, message, onConfirm, onCancel }: {
+  open: boolean;
+  title: string;
+  message: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <Dialog open={open} onClose={onCancel}>
+      <DialogTitle>{title}</DialogTitle>
+      <DialogContent>
+        <DialogContentText>{message}</DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onCancel}>Cancel</Button>
+        <Button onClick={onConfirm} color="primary" autoFocus>
+          Confirm
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
 
 export default UserList;
