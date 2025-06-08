@@ -71,16 +71,16 @@ async def prometheus_middleware(request: Request, call_next):
     process_time = time.time() - start_time
 
     route = request.scope.get("route")
-    endpoint = route.path if route else request.url.path
+    route = route.path if route else request.url.path
 
     # Update metrics
     REQUEST_COUNT.labels(
         method=request.method,
-        endpoint=endpoint,
+        route=route,
         http_status=response.status_code,
     ).inc()
 
-    REQUEST_LATENCY.labels(method=request.method, endpoint=endpoint).observe(
+    REQUEST_LATENCY.labels(method=request.method, route=route).observe(
         process_time,
     )
 
