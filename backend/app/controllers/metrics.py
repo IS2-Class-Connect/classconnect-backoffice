@@ -32,13 +32,13 @@ MEMORY_USAGE = Gauge(
 REQUEST_COUNT = Counter(
     "http_requests_total",
     "Total HTTP requests",
-    ["method", "endpoint", "http_status"],
+    ["method", "route", "http_status"],
     registry=registry,
 )
 REQUEST_LATENCY = Histogram(
     "http_request_duration_seconds",
     "HTTP request latency",
-    ["method", "endpoint"],
+    ["method", "route"],
     registry=registry,
 )
 
