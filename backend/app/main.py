@@ -77,7 +77,7 @@ async def prometheus_middleware(request: Request, call_next):
     REQUEST_COUNT.labels(
         method=request.method,
         route=route,
-        http_status=response.status_code,
+        status=response.status_code,
     ).inc()
 
     REQUEST_LATENCY.labels(method=request.method, route=route).observe(
