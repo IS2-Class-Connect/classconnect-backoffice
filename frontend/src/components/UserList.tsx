@@ -40,8 +40,8 @@ const UserList = () => {
     open: false,
     title: '',
     message: '',
-    onConfirm: () => {},
-    onCancel: () => {},
+    onConfirm: () => { },
+    onCancel: () => { },
   });
 
   useEffect(() => {
@@ -111,30 +111,38 @@ const UserList = () => {
 
   const updateUserRole = async (uuid: string, courseId: string, newRole: string) => {
     try {
-      await api.patch(`/admins/courses/${courseId}/enrollments/${uuid}`, { role: newRole });
       const username = users.find((user) => user.uuid === uuid)?.name || '';
 
-      if (!window.confirm(`Are you sure you want to change the role of ${username} to ${newRole.toLowerCase()}?`)) {
-        return;
-      }
+      setConfirmDialog({
+        open: true,
+        title: 'Confirm Action',
+        message: `Are you sure you want to set the role of ${username} to ${newRole.toLowerCase()} for this course?`,
+        onConfirm: async () => {
+          setConfirmDialog((prev) => ({ ...prev, open: false }));
+          await api.patch(`/admins/courses/${courseId}/enrollments/${uuid}`, { role: newRole });
 
-      setUsers((prevUsers) =>
-        prevUsers.map((user) => {
-          if (user.uuid === uuid) {
-            return {
-              ...user,
-              enrollments: user.enrollments.map((enrollment: Enrollment) => (
-                enrollment.course.id === courseId
-                  ? { ...enrollment, role: newRole }
-                  : enrollment
-              )),
-            };
-          }
-          return user;
-        })
-      );
+          setUsers((prevUsers) =>
+            prevUsers.map((user) => {
+              if (user.uuid === uuid) {
+                return {
+                  ...user,
+                  enrollments: user.enrollments.map((enrollment: Enrollment) => (
+                    enrollment.course.id === courseId
+                      ? { ...enrollment, role: newRole }
+                      : enrollment
+                  )),
+                };
+              }
+              return user;
+            })
+          );
 
-      toast.success(`Updated role for ${username} to ${newRole.toLowerCase()}!`)
+          toast.success(`Updated role for ${username} to ${newRole.toLowerCase()}!`)
+        },
+        onCancel: () => {
+          setConfirmDialog((prev) => ({ ...prev, open: false }));
+        },
+      });
     } catch (error) {
       console.error("Error updating user role:", error);
       toast.error("Error updating user role")
