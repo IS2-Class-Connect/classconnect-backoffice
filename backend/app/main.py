@@ -10,6 +10,8 @@ import logging
 import os
 import time
 
+DEFAULT_SECRET = "secret"
+
 
 def initialize_log(logging_level):
     class CustomFormatter(logging.Formatter):
@@ -29,6 +31,13 @@ def initialize_log(logging_level):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    initialize_log(logging.INFO)
+
+    JWT_SECRET = os.getenv("JWT_SECRET")
+    if not JWT_SECRET:
+        logging.warning(f"JWT_SECRET was not defined, using default `{DEFAULT_SECRET}`")
+        JWT_SECRET = DEFAULT_SECRET
+
     DB_URI = os.getenv("DB_URI")
     if not DB_URI:
         raise ValueError("No database URI was provided")
@@ -50,11 +59,10 @@ async def lifespan(app: FastAPI):
     except:
         raise RuntimeError("couldn't connect to db")
 
-    service = AdminService(db, GATEWAY_TOKEN, GATEWAY_URL)
+    service = AdminService(db, GATEWAY_TOKEN, GATEWAY_URL, JWT_SECRET)
     controller = AdminController(service)
     admin_router = AdminRouter(controller)
     app.include_router(admin_router.router)
-    initialize_log(logging.INFO)
 
     yield
 

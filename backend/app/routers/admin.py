@@ -1,9 +1,10 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from app.controllers.admin import AdminController
 from app.controllers.metrics import MetricsController
 from app.models.admin import AdminCreate, AdminOut, AdminLogin, Token
 from app.models.users import UserOut, Enrollment, EnrollmentUpdate
 from app.models.admin import LockStatusUpdate
+from app.auth.auth import get_current_admin
 import logging
 
 
@@ -12,23 +13,36 @@ class AdminRouter:
         self._controller = controller
         self._metrics_controller = MetricsController()
         self.router = APIRouter(prefix="/admins", tags=["admins"])
+        dependencies = [Depends(get_current_admin)]
 
         self.router.get("/metrics")(self.get_metrics)
-        self.router.get("/users", response_model=list[UserOut])(self.get_all_users)
-        self.router.get("", response_model=list[AdminOut])(self.get_all_admins)
-        self.router.get("/{id}", response_model=AdminOut)(self.get_admin)
-        self.router.get("/courses/enrollments", response_model=list[Enrollment])(
-            self.get_all_users_enrollment
+        self.router.get(
+            "/users", response_model=list[UserOut], dependencies=dependencies
+        )(self.get_all_users)
+        self.router.get("", response_model=list[AdminOut], dependencies=dependencies)(
+            self.get_all_admins
         )
+        self.router.get("/{id}", response_model=AdminOut, dependencies=dependencies)(
+            self.get_admin
+        )
+        self.router.get(
+            "/courses/enrollments",
+            response_model=list[Enrollment],
+            dependencies=dependencies,
+        )(self.get_all_users_enrollment)
         self.router.post("/login", response_model=Token)(self.login)
-        self.router.post("", response_model=AdminOut, status_code=201)(
-            self.create_admin
+        self.router.post(
+            "", response_model=AdminOut, status_code=201, dependencies=dependencies
+        )(self.create_admin)
+        self.router.delete("/{id}", status_code=204, dependencies=dependencies)(
+            self.delete_admin
         )
-        self.router.delete("/{id}", status_code=204)(self.delete_admin)
-        self.router.patch("/users/{uuid}/lock-status")(self.update_user_lock_status)
-        self.router.patch("/courses/{courseId}/enrollments/{uuid}")(
-            self.update_user_enrollment
+        self.router.patch("/users/{uuid}/lock-status", dependencies=dependencies)(
+            self.update_user_lock_status
         )
+        self.router.patch(
+            "/courses/{courseId}/enrollments/{uuid}", dependencies=dependencies
+        )(self.update_user_enrollment)
 
     async def login(self, login_data: AdminLogin):
         logging.info(f"Trying to login for admin {login_data.email}")

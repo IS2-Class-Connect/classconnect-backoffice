@@ -59,7 +59,7 @@ enrollments: dict[str, dict[str, Enrollment]] = {
 @pytest.fixture
 def app():
     db = DictDB()
-    service = AdminService(db, "testing-token", "testing-url")
+    service = AdminService(db, "testing-token", "testing-url", "secret")
     mock_service = AdminMockService(service, users, enrollments)
     controller = AdminController(mock_service)
     router = AdminRouter(controller)
