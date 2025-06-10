@@ -64,7 +64,7 @@ class Service(ABC):
         pass
 
     @abstractmethod
-    async def update_rule(self, id: str, data: RuleUpdate):
+    async def update_rule(self, id: str, admin_name: str, data: RuleUpdate):
         pass
 
     @abstractmethod

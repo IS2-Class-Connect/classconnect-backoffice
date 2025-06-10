@@ -1,4 +1,4 @@
-from typing import Any, Optional, override
+from typing import Any, Optional, override, Dict, Tuple
 from app.databases.db import DB
 from collections import defaultdict
 from uuid import uuid4
@@ -13,36 +13,38 @@ class DictDB(DB):
         pass
 
     @override
-    async def create(self, collection: str, data: dict[str, Any]) -> dict[str, Any]:
+    async def create(self, collection: str, data: Dict[str, Any]) -> Dict[str, Any]:
         id = str(uuid4())
         full_data = {"id": id, **data}
         self._db[collection][id] = full_data
         return full_data
 
     @override
-    async def update(self, collection: str, id: str, data: dict[str, Any]) -> bool:
+    async def update(
+        self, collection: str, id: str, data: Dict[str, Any]
+    ) -> Optional[Dict[str, Any]]:
         value = self._db[collection].get(id)
         if not value:
-            return False
+            return None
 
         self._db[collection][id] = {**value, **data}
-        return True
+        return value
 
     @override
-    async def find_one(self, collection: str, id: str) -> Optional[dict[str, Any]]:
+    async def find_one(self, collection: str, id: str) -> Optional[Dict[str, Any]]:
         return self._db[collection].get(id)
 
     @override
     async def find_one_by_filter(
-        self, collection: str, filter: dict[str, Any]
-    ) -> Optional[dict[str, Any]]:
+        self, collection: str, filter: Dict[str, Any]
+    ) -> Optional[Dict[str, Any]]:
         for doc in self._db[collection].values():
             if all(doc.get(k) == v for k, v in filter.items()):
                 return doc
         return None
 
     @override
-    async def get_all(self, collection: str) -> list[dict[str, Any]]:
+    async def get_all(self, collection: str) -> list[Dict[str, Any]]:
         return list(self._db[collection].values())
 
     @override

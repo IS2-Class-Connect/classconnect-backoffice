@@ -47,5 +47,10 @@ class RuleUpdate(BaseModel):
     applicable_conditions: Optional[List[str]] = None
 
 
+class RuleUpdateWithAdminName(BaseModel):
+    admin_name: str
+    update: RuleUpdate
+
+
 class RulePacket(BaseModel):
     rules: List[RuleOut]

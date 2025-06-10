@@ -113,10 +113,20 @@ class AdminService(Service):
         return RuleOut(**rule) if rule else None
 
     @override
-    async def update_rule(self, id: str, data: RuleUpdate):
+    async def update_rule(self, id: str, admin_name: str, data: RuleUpdate):
         rule_dict = data.model_dump(exclude_unset=True)
-        if not await self._db.update(self._rule_coll, id, rule_dict):
+
+        prev = await self._db.update(self._rule_coll, id, rule_dict)
+        if not prev:
             raise HTTPException(404, "The provided rule id doesn't exist")
+
+        changes = []
+        for field, new_value in rule_dict.items():
+            change = f"{field}:\n\tfrom: `{prev[field]}`\n\tto:   `{new_value}`"
+            changes.append(change)
+
+        changes_fmt = "\n".join(changes)
+        logging.info(f"{admin_name} made changes to rule id: {id}:\n{changes_fmt}")
 
     async def _send_to_gateway(
         self, method: Callable, endpoint: str, **kwargs

@@ -19,7 +19,7 @@ from app.models.admin import (
 class AdminMockService(Service):
     def __init__(
         self,
-        service: AdminService,
+        service: Service,
         users: dict[str, UserOut],
         enrollments: dict[str, dict[str, Enrollment]],
         notification_channel: deque[RulePacket],
@@ -90,8 +90,8 @@ class AdminMockService(Service):
         return await self._inner.get_rule(id)
 
     @override
-    async def update_rule(self, id: str, data: RuleUpdate):
-        return await self._inner.update_rule(id, data)
+    async def update_rule(self, id: str, admin_name: str, data: RuleUpdate):
+        return await self._inner.update_rule(id, admin_name, data)
 
     @override
     async def notify_rules(self):

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Body
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.controllers.admin import AdminController
 from app.controllers.metrics import MetricsController
@@ -10,7 +10,7 @@ from app.models.admin import (
     LockStatusUpdate,
     RuleCreate,
     RuleOut,
-    RuleUpdate,
+    RuleUpdateWithAdminName,
 )
 from app.models.users import UserOut, Enrollment, EnrollmentUpdate
 import logging
@@ -183,9 +183,11 @@ class AdminRouter:
         logging.info("Trying to get all rules")
         return await self._controller.get_all_rules()
 
-    async def update_rule(self, id: str, update: RuleUpdate):
-        logging.info(f"Trying to update rule with id: {id}")
-        return await self._controller.update_rule(id, update)
+    async def update_rule(self, id: str, update: RuleUpdateWithAdminName):
+        admin_name = update.admin_name
+        rule_update = update.update
+        logging.info(f"Trying to update rule with id: {id}, by {admin_name}")
+        return await self._controller.update_rule(id, admin_name, rule_update)
 
     async def get_rule(self, id: str):
         logging.info(f"Trying to get rule with id: {id}")

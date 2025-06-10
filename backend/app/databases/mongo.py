@@ -1,4 +1,4 @@
-from typing import Any, Optional, override
+from typing import Any, Optional, override, Dict
 from fastapi import HTTPException
 from app.databases.db import DB
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -30,7 +30,7 @@ class MongoDB(DB):
             raise HTTPException(500, str(e))
 
     @override
-    async def create(self, collection: str, data: dict[str, Any]) -> dict[str, Any]:
+    async def create(self, collection: str, data: Dict[str, Any]) -> Dict[str, Any]:
         async def inner():
             result = await self._db[collection].insert_one(data)
             return {"id": str(result.inserted_id), **data}
@@ -38,18 +38,25 @@ class MongoDB(DB):
         return await self._try(inner)
 
     @override
-    async def update(self, collection: str, id: str, data: dict[str, Any]) -> bool:
+    async def update(
+        self, collection: str, id: str, data: Dict[str, Any]
+    ) -> Optional[Dict[str, Any]]:
         async def inner():
-            result = await self._db[collection].update_one(
+            prev = await self.find_one(collection, id)
+            if not prev:
+                return None
+
+            await self._db[collection].update_one(
                 {"_id": self._objectid(id)},
                 {"$set": data},
             )
-            return result.did_upsert
+
+            return prev
 
         return await self._try(inner)
 
     @override
-    async def find_one(self, collection: str, id: str) -> Optional[dict[str, Any]]:
+    async def find_one(self, collection: str, id: str) -> Optional[Dict[str, Any]]:
         async def inner():
             document = await self._db[collection].find_one({"_id": self._objectid(id)})
             if document:
@@ -60,8 +67,8 @@ class MongoDB(DB):
 
     @override
     async def find_one_by_filter(
-        self, collection: str, filter: dict[str, Any]
-    ) -> Optional[dict[str, Any]]:
+        self, collection: str, filter: Dict[str, Any]
+    ) -> Optional[Dict[str, Any]]:
         async def inner():
             document = await self._db[collection].find_one(filter)
             if document:
@@ -71,7 +78,7 @@ class MongoDB(DB):
         return await self._try(inner)
 
     @override
-    async def get_all(self, collection: str) -> list[dict[str, Any]]:
+    async def get_all(self, collection: str) -> list[Dict[str, Any]]:
         async def inner():
             users = []
             cursor = self._db[collection].find()

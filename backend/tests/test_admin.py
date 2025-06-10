@@ -378,6 +378,7 @@ def test_update_user_enrollment(client: TestClient):
 #
 ###
 base_rule = {
+    "admin_name": "name",
     "title": "title",
     "description": "description",
     "effective_date": "2025-05-20T15:05:00Z",
@@ -434,6 +435,12 @@ def test_create_rule_with_same_title(client: TestClient):
 # Rule Updating
 #
 ###
+base_update = {
+    "admin_name": "name",
+    "update": base_rule,
+}
+
+
 def test_rule_updating_exists(client: TestClient):
     res = client.post(
         "/admins/rules",
@@ -446,7 +453,7 @@ def test_rule_updating_exists(client: TestClient):
 
     res = client.patch(
         f"/admins/rules/{id}",
-        json={**base_rule, "title": new_title},
+        json={**base_update, "update": {**base_rule, "title": new_title}},
         headers=VALID_HEADERS,
     )
     assert res.status_code == 200
@@ -467,7 +474,7 @@ def test_rule_update_does_not_exist(client: TestClient):
 
     res = client.patch(
         f"/admins/rules/{id}",
-        json={**base_rule, "title": new_title},
+        json={**base_update, "update": {**base_rule, "title": new_title}},
         headers=VALID_HEADERS,
     )
     assert res.status_code == 404
@@ -485,7 +492,7 @@ def test_rule_update_partial_data(client: TestClient):
 
     res = client.patch(
         f"/admins/rules/{id}",
-        json={"title": new_title},
+        json={"admin_name": "name", "update": {"title": new_title}},
         headers=VALID_HEADERS,
     )
     assert res.status_code == 200

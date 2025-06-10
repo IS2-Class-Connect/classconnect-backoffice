@@ -1,5 +1,5 @@
 from abc import abstractmethod, ABC
-from typing import Any, Optional
+from typing import Any, Optional, Dict
 
 
 class DB(ABC):
@@ -8,25 +8,27 @@ class DB(ABC):
         pass
 
     @abstractmethod
-    async def create(self, collection: str, data: dict[str, Any]) -> dict[str, Any]:
+    async def create(self, collection: str, data: Dict[str, Any]) -> Dict[str, Any]:
         pass
 
     @abstractmethod
-    async def update(self, collection: str, id: str, data: dict[str, Any]) -> bool:
+    async def update(
+        self, collection: str, id: str, data: Dict[str, Any]
+    ) -> Optional[Dict[str, Any]]:
         pass
 
     @abstractmethod
-    async def find_one(self, collection: str, id: str) -> Optional[dict[str, Any]]:
+    async def find_one(self, collection: str, id: str) -> Optional[Dict[str, Any]]:
         pass
 
     @abstractmethod
     async def find_one_by_filter(
-        self, collection: str, filter: dict[str, Any]
-    ) -> Optional[dict[str, Any]]:
+        self, collection: str, filter: Dict[str, Any]
+    ) -> Optional[Dict[str, Any]]:
         pass
 
     @abstractmethod
-    async def get_all(self, collection: str) -> list[dict[str, Any]]:
+    async def get_all(self, collection: str) -> list[Dict[str, Any]]:
         pass
 
     @abstractmethod
