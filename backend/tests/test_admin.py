@@ -89,6 +89,16 @@ def client(app: FastAPI):
 
 ###
 #
+# Auth
+#
+###
+def test_hitting_endpoint_without_token(client: TestClient):
+    res = client.get("/admins")
+    assert res.status_code == 401
+
+
+###
+#
 # Admin Creation
 #
 ###

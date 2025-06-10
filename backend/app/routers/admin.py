@@ -16,6 +16,12 @@ def validate_token_with_secret_key(secret_key: str):
     def validate_token(
         credentials: HTTPAuthorizationCredentials = Depends(security),
     ):
+        if not credentials:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="No authentication credentials were provided",
+            )
+
         try:
             token = credentials.credentials
             return jwt.decode(token, secret_key, algorithms=[ALGORITHM])
