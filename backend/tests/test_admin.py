@@ -1,5 +1,5 @@
 from fastapi.testclient import TestClient
-from app.models.admin import AdminCreate, AdminLogin, LockStatusUpdate, Rule
+from app.models.admin import AdminCreate, AdminLogin, LockStatusUpdate, RuleCreate
 from app.models.users import UserOut, Enrollment, EnrollmentUpdate
 from app.routers.admin import AdminRouter
 from app.controllers.admin import AdminController
@@ -375,7 +375,7 @@ def test_create_rule(client: TestClient):
     data = res.json()
     assert len(data) == 0
 
-    data = Rule(
+    data = RuleCreate(
         title="title",
         description="description",
         effective_date="2025-05-20T15:05:00Z",
@@ -397,7 +397,7 @@ def test_create_rule(client: TestClient):
 
 
 def test_create_rule_with_same_title(client: TestClient):
-    data = Rule(
+    data = RuleCreate(
         title="title",
         description="description",
         effective_date="2025-05-20T15:05:00Z",
@@ -411,7 +411,7 @@ def test_create_rule_with_same_title(client: TestClient):
     )
     assert res.status_code == 201
 
-    data = Rule(
+    data = RuleCreate(
         title="title",
         description="different description",
         effective_date="2026-06-21T16-06:01Z",

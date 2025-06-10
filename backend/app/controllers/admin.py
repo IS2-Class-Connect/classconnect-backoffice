@@ -1,7 +1,14 @@
 from fastapi import HTTPException
 from app.exceptions.username_or_email import UsernameEmailInUser
 from app.exceptions.rule_title_in_use import TitleAlreadyInUse
-from app.models.admin import AdminCreate, AdminOut, AdminLogin, Token, Rule
+from app.models.admin import (
+    AdminCreate,
+    AdminOut,
+    AdminLogin,
+    Token,
+    RuleCreate,
+    RuleOut,
+)
 from app.models.users import UserOut, Enrollment, EnrollmentUpdate
 from app.services.service import Service
 
@@ -57,11 +64,11 @@ class AdminController:
             uuid, courseId, enrollmentData
         )
 
-    async def create_rule(self, rule: Rule) -> Rule:
+    async def create_rule(self, rule: RuleCreate) -> RuleOut:
         try:
             return await self._service.create_rule(rule)
         except TitleAlreadyInUse as e:
             raise HTTPException(status_code=409, detail=str(e))
 
-    async def get_all_rules(self) -> list[Rule]:
+    async def get_all_rules(self) -> list[RuleOut]:
         return await self._service.get_all_rules()

@@ -1,5 +1,12 @@
 from typing import Optional, override
-from app.models.admin import AdminCreate, AdminOut, AdminLogin, Token, Rule
+from app.models.admin import (
+    AdminCreate,
+    AdminOut,
+    AdminLogin,
+    Token,
+    RuleCreate,
+    RuleOut,
+)
 from app.models.users import UserOut, Enrollment, EnrollmentUpdate
 from app.services.service import Service
 from app.services.admin import AdminService
@@ -66,9 +73,9 @@ class AdminMockService(Service):
         self._enrollments[uuid][courseId].role = enrollmentData.role
 
     @override
-    async def create_rule(self, data: Rule) -> Rule:
+    async def create_rule(self, data: RuleCreate) -> RuleOut:
         return await self._inner.create_rule(data)
 
     @override
-    async def get_all_rules(self) -> list[Rule]:
+    async def get_all_rules(self) -> list[RuleOut]:
         return await self._inner.get_all_rules()

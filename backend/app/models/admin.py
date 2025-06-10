@@ -29,8 +29,12 @@ class LockStatusUpdate(BaseModel):
     locked: bool
 
 
-class Rule(BaseModel):
+class RuleCreate(BaseModel):
     title: str
     description: str
     effective_date: str
     applicable_conditions: List[str]
+
+
+class RuleOut(RuleCreate):
+    id: str

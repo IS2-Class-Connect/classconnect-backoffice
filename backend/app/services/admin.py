@@ -2,11 +2,18 @@ from typing import Optional, override
 from app.databases.db import DB
 from app.exceptions.username_or_email import UsernameEmailInUser
 from app.exceptions.rule_title_in_use import TitleAlreadyInUse
-from app.models.admin import AdminCreate, AdminOut, AdminLogin, Token, Rule
 from app.models.users import UserOut, EnrollmentUsers, Enrollment, EnrollmentUpdate
 from app.services.service import Service
 from fastapi import HTTPException
 from datetime import datetime, timedelta
+from app.models.admin import (
+    AdminCreate,
+    AdminOut,
+    AdminLogin,
+    Token,
+    RuleCreate,
+    RuleOut,
+)
 import bcrypt
 import jwt
 import requests
@@ -150,15 +157,15 @@ class AdminService(Service):
             )
 
     @override
-    async def create_rule(self, data: Rule) -> Rule:
+    async def create_rule(self, data: RuleCreate) -> RuleOut:
         existing = await self._db.exists_with_title(self._rule_coll, data.title)
         if existing:
             raise TitleAlreadyInUse()
 
         rule_dict = data.model_dump()
         rule = await self._db.create(self._rule_coll, rule_dict)
-        return Rule(**rule)
+        return RuleOut(**rule)
 
     @override
-    async def get_all_rules(self) -> list[Rule]:
-        return [Rule(**rule) for rule in (await self._db.get_all(self._rule_coll))]
+    async def get_all_rules(self) -> list[RuleOut]:
+        return [RuleOut(**rule) for rule in (await self._db.get_all(self._rule_coll))]

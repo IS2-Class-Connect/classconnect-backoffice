@@ -8,7 +8,8 @@ from app.models.admin import (
     AdminLogin,
     Token,
     LockStatusUpdate,
-    Rule,
+    RuleCreate,
+    RuleOut,
 )
 from app.models.users import UserOut, Enrollment, EnrollmentUpdate
 import logging
@@ -67,14 +68,14 @@ class AdminRouter:
         self.router.get(
             "/rules",
             dependencies=dependencies,
-            response_model=list[Rule],
+            response_model=list[RuleOut],
         )(self.get_all_rules)
 
         self.router.post(
             "/rules",
             status_code=201,
             dependencies=dependencies,
-            response_model=Rule,
+            response_model=RuleOut,
         )(self.create_rule)
 
         self.router.get(
@@ -156,7 +157,7 @@ class AdminRouter:
     async def get_metrics(self):
         return self._metrics_controller.get_metrics()
 
-    async def create_rule(self, rule: Rule):
+    async def create_rule(self, rule: RuleCreate):
         logging.info(f"Trying to create a new rule with title {rule.title}")
         return await self._controller.create_rule(rule)
 
