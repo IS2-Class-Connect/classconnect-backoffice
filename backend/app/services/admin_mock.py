@@ -3,6 +3,7 @@ from app.models.users import UserOut, Enrollment, EnrollmentUpdate
 from app.services.service import Service
 from app.services.admin import AdminService
 from fastapi import HTTPException
+from collections import deque
 from app.models.admin import (
     AdminCreate,
     AdminOut,
@@ -11,6 +12,7 @@ from app.models.admin import (
     RuleCreate,
     RuleOut,
     RuleUpdate,
+    RulePacket,
 )
 
 
@@ -20,10 +22,12 @@ class AdminMockService(Service):
         service: AdminService,
         users: dict[str, UserOut],
         enrollments: dict[str, dict[str, Enrollment]],
+        notification_channel: deque[RulePacket],
     ):
         self._inner = service
         self._users = users
         self._enrollments = enrollments
+        self._notification_channel = notification_channel
 
     @override
     async def create_admin(self, data: AdminCreate) -> AdminOut:
@@ -88,3 +92,8 @@ class AdminMockService(Service):
     @override
     async def update_rule(self, id: str, data: RuleUpdate):
         return await self._inner.update_rule(id, data)
+
+    @override
+    async def notify_rules(self):
+        rules = await self.get_all_rules()
+        self._notification_channel.append(RulePacket(rules=rules))

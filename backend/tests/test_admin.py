@@ -1,3 +1,4 @@
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from app.models.users import UserOut, Enrollment, EnrollmentUpdate
 from app.routers.admin import AdminRouter
@@ -5,15 +6,14 @@ from app.controllers.admin import AdminController
 from app.services.admin import AdminService
 from app.services.admin_mock import AdminMockService
 from app.databases.dict import DictDB
-from fastapi import FastAPI
 from datetime import datetime, timedelta
+from collections import deque
 from app.models.admin import (
     AdminCreate,
     AdminLogin,
     LockStatusUpdate,
-    RuleCreate,
     RuleOut,
-    RuleUpdate,
+    RulePacket,
 )
 import pytest
 import jwt
@@ -65,6 +65,8 @@ enrollments: dict[str, dict[str, Enrollment]] = {
     },
 }
 
+notification_channel: deque[RulePacket] = deque()
+
 SECRET_KEY = "testing"
 
 
@@ -72,7 +74,7 @@ SECRET_KEY = "testing"
 def app():
     db = DictDB()
     service = AdminService(db, "testing-token", "testing-url", SECRET_KEY)
-    mock_service = AdminMockService(service, users, enrollments)
+    mock_service = AdminMockService(service, users, enrollments, notification_channel)
     controller = AdminController(mock_service)
     router = AdminRouter(controller, SECRET_KEY)
 
@@ -499,3 +501,34 @@ def test_rule_update_partial_data(client: TestClient):
     assert rule.description == base_rule["description"]
     assert rule.effective_date == base_rule["effective_date"]
     assert rule.applicable_conditions == base_rule["applicable_conditions"]
+
+
+###
+#
+# Rule Notification
+#
+###
+def test_sending_notifications_empty(client: TestClient):
+    res = client.post("/admins/rules/notify", headers=VALID_HEADERS)
+    assert res.status_code == 204
+    assert len(notification_channel) == 1
+
+    pkt = notification_channel.popleft()
+    assert len(pkt.rules) == 0
+
+
+def test_sending_notifications(client: TestClient):
+    res = client.post(
+        "/admins/rules",
+        json=base_rule,
+        headers=VALID_HEADERS,
+    )
+    assert res.status_code == 201
+
+    res = client.post("/admins/rules/notify", headers=VALID_HEADERS)
+    assert res.status_code == 204
+
+    assert len(notification_channel) == 1
+
+    pkt = notification_channel.popleft()
+    assert len(pkt.rules) == 1

@@ -1,4 +1,4 @@
-from typing import Optional, override
+from typing import Optional, override, Callable
 from app.databases.db import DB
 from app.exceptions.username_or_email import UsernameEmailInUser
 from app.exceptions.rule_title_in_use import TitleAlreadyInUse
@@ -6,6 +6,7 @@ from app.models.users import UserOut, EnrollmentUsers, Enrollment, EnrollmentUpd
 from app.services.service import Service
 from fastapi import HTTPException
 from datetime import datetime, timedelta
+from requests import HTTPError, Response
 from app.models.admin import (
     AdminCreate,
     AdminOut,
@@ -14,6 +15,7 @@ from app.models.admin import (
     RuleCreate,
     RuleOut,
     RuleUpdate,
+    RulePacket,
 )
 import bcrypt
 import jwt
@@ -92,72 +94,6 @@ class AdminService(Service):
         return Token(access_token=token)
 
     @override
-    async def get_all_users(self) -> list[UserOut]:
-        url = f"{self._gateway_url}/admin-backend/users"
-        headers = {"Authorization": f"Bearer {self._gateway_token}"}
-
-        try:
-            res = requests.get(url, headers=headers, timeout=5)
-            res.raise_for_status()
-            return [UserOut(**user) for user in res.json()]
-        except Exception:
-            raise HTTPException(
-                status_code=502, detail="Failed to connect to users service"
-            )
-
-    @override
-    async def get_all_users_enrollment(self) -> list[Enrollment]:
-        url = f"{self._gateway_url}/admin-backend/courses/enrollments"
-        headers = {"Authorization": f"Bearer {self._gateway_token}"}
-
-        try:
-            res = requests.get(url, headers=headers, timeout=5)
-            res.raise_for_status()
-            data = res.json()
-            return EnrollmentUsers(**data).data
-        except Exception:
-            raise HTTPException(
-                status_code=502, detail="Failed to connect to education service"
-            )
-
-    @override
-    async def update_user_lock_status(self, uuid: str, locked: bool):
-        url = f"{self._gateway_url}/admin-backend/users/{uuid}/lock-status"
-        headers = {"Authorization": f"Bearer {self._gateway_token}"}
-        data = {"locked": locked}
-
-        try:
-            res = requests.patch(url, json=data, headers=headers, timeout=5)
-            res.raise_for_status()
-            status = "locked" if locked else "unlocked"
-            logging.info(f"{status} user {uuid}")
-            return res.json()
-        except Exception:
-            raise HTTPException(
-                status_code=502, detail="Failed to connect to users service"
-            )
-
-    @override
-    async def update_user_enrollment(
-        self, courseId: str, uuid: str, enrollmentData: EnrollmentUpdate
-    ):
-        url = f"{self._gateway_url}/admin-backend/courses/{courseId}/enrollments/{uuid}"
-        headers = {"Authorization": f"Bearer {self._gateway_token}"}
-        data = {"role": enrollmentData.role}
-
-        try:
-            res = requests.patch(url, json=data, headers=headers, timeout=5)
-            res.raise_for_status()
-            logging.info(
-                f"updated role for user {uuid} to {enrollmentData.role} at course {courseId}"
-            )
-            return res.json()
-        except Exception:
-            raise HTTPException(
-                status_code=502, detail="Failed to connect to education service"
-            )
-
-    @override
     async def create_rule(self, data: RuleCreate) -> RuleOut:
         existing = await self._db.exists_with_title(self._rule_coll, data.title)
         if existing:
@@ -181,3 +117,58 @@ class AdminService(Service):
         rule_dict = data.model_dump(exclude_unset=True)
         if not await self._db.update(self._rule_coll, id, rule_dict):
             raise HTTPException(404, "The provided rule id doesn't exist")
+
+    async def _send_to_gateway(
+        self, method: Callable, endpoint: str, **kwargs
+    ) -> Response:
+        url = f"{self._gateway_url}/admin-backend{endpoint}"
+        headers = {"Authorization": f"Bearer {self._gateway_token}"}
+        try:
+            res: Response = method(
+                **{"url": url, "headers": headers, "timeout": 5, **kwargs}
+            )
+            res.raise_for_status()
+            return res
+        except HTTPError as e:
+            raise HTTPException(
+                status_code=e.response.status_code, detail=e.response.reason
+            )
+
+    @override
+    async def get_all_users(self) -> list[UserOut]:
+        endpoint = "/users"
+        res = await self._send_to_gateway(requests.get, endpoint)
+        return [UserOut(**user) for user in res.json()]
+
+    @override
+    async def get_all_users_enrollment(self) -> list[Enrollment]:
+        endpoint = "/courses/enrollments"
+        res = await self._send_to_gateway(requests.get, endpoint)
+        return EnrollmentUsers(**res.json()).data
+
+    @override
+    async def update_user_lock_status(self, uuid: str, locked: bool):
+        endpoint = f"/users/{uuid}/lock-status"
+        data = {"locked": locked}
+        await self._send_to_gateway(requests.patch, endpoint, json=data)
+        status = "locked" if locked else "unlocked"
+        logging.info(f"{status} user {uuid}")
+
+    @override
+    async def update_user_enrollment(
+        self, courseId: str, uuid: str, enrollmentData: EnrollmentUpdate
+    ):
+        endpoint = f"/courses/{courseId}/enrollments/{uuid}"
+        data = {"role": enrollmentData.role}
+        await self._send_to_gateway(requests.patch, endpoint, json=data)
+        logging.info(
+            f"updated role for user {uuid} to {enrollmentData.role} at course {courseId}"
+        )
+
+    @override
+    async def notify_rules(self):
+        rules = await self.get_all_rules()
+        endpoint = "/rules"
+        data = RulePacket(rules=rules).model_dump()
+        await self._send_to_gateway(requests.post, endpoint, json=data)
+        logging.info("sent notification for rules")

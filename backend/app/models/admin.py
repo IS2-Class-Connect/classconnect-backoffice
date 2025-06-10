@@ -45,3 +45,7 @@ class RuleUpdate(BaseModel):
     description: Optional[str] = None
     effective_date: Optional[str] = None
     applicable_conditions: Optional[List[str]] = None
+
+
+class RulePacket(BaseModel):
+    rules: List[RuleOut]

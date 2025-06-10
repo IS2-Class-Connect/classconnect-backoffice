@@ -92,6 +92,12 @@ class AdminRouter:
             dependencies=dependencies,
         )(self.create_admin)
 
+        self.router.post(
+            "/rules/notify",
+            status_code=204,
+            dependencies=dependencies,
+        )(self.notify_rules)
+
         self.router.delete(
             "/{id}",
             status_code=204,
@@ -184,3 +190,7 @@ class AdminRouter:
     async def get_rule(self, id: str):
         logging.info(f"Trying to get rule with id: {id}")
         return await self._controller.get_rule(id)
+
+    async def notify_rules(self):
+        logging.info(f"Trying to notify rules")
+        return await self._controller.notify_rules()

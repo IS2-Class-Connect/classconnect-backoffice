@@ -86,3 +86,6 @@ class AdminController:
 
     async def update_rule(self, id: str, rule: RuleUpdate):
         return await self._service.update_rule(id, rule)
+
+    async def notify_rules(self):
+        return await self._service.notify_rules()
