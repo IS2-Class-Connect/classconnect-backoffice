@@ -1,5 +1,4 @@
 from typing import Any, Optional, override
-
 from fastapi import HTTPException
 from app.databases.db import DB
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -89,5 +88,13 @@ class MongoDB(DB):
             if document:
                 document["id"] = str(document["_id"])
             return document
+
+        return await self._try(inner)
+
+    @override
+    async def exists_with_title(self, collection: str, title: str) -> bool:
+        async def inner():
+            document = await self._db[collection].find_one({"title": title})
+            return document is not None
 
         return await self._try(inner)

@@ -2,9 +2,15 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.controllers.admin import AdminController
 from app.controllers.metrics import MetricsController
-from app.models.admin import AdminCreate, AdminOut, AdminLogin, Token
+from app.models.admin import (
+    AdminCreate,
+    AdminOut,
+    AdminLogin,
+    Token,
+    LockStatusUpdate,
+    Rule,
+)
 from app.models.users import UserOut, Enrollment, EnrollmentUpdate
-from app.models.admin import LockStatusUpdate
 import logging
 import jwt
 
@@ -59,10 +65,17 @@ class AdminRouter:
         )(self.get_all_admins)
 
         self.router.get(
-            "/{id}",
-            response_model=AdminOut,
+            "/rules",
             dependencies=dependencies,
-        )(self.get_admin)
+            response_model=list[Rule],
+        )(self.get_all_rules)
+
+        self.router.post(
+            "/rules",
+            status_code=201,
+            dependencies=dependencies,
+            response_model=Rule,
+        )(self.create_rule)
 
         self.router.get(
             "/courses/enrollments",
@@ -92,6 +105,12 @@ class AdminRouter:
             "/courses/{courseId}/enrollments/{uuid}",
             dependencies=dependencies,
         )(self.update_user_enrollment)
+
+        self.router.get(
+            "/{id}",
+            response_model=AdminOut,
+            dependencies=dependencies,
+        )(self.get_admin)
 
     async def login(self, login_data: AdminLogin):
         logging.info(f"Trying to login for admin {login_data.email}")
@@ -136,3 +155,11 @@ class AdminRouter:
 
     async def get_metrics(self):
         return self._metrics_controller.get_metrics()
+
+    async def create_rule(self, rule: Rule):
+        logging.info(f"Trying to create a new rule with title {rule.title}")
+        return await self._controller.create_rule(rule)
+
+    async def get_all_rules(self):
+        logging.info("Trying to get all rules")
+        return await self._controller.get_all_rules()

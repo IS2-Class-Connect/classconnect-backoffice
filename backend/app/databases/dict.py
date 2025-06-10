@@ -50,3 +50,10 @@ class DictDB(DB):
             if all(doc.get(k) == v for k, v in filter.items()):
                 return doc
         return None
+
+    @override
+    async def exists_with_title(self, collection: str, title: str) -> bool:
+        for doc in self._db[collection].values():
+            if doc.get("title") == title:
+                return True
+        return False

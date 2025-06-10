@@ -1,5 +1,5 @@
 from fastapi.testclient import TestClient
-from app.models.admin import AdminCreate, AdminLogin, LockStatusUpdate
+from app.models.admin import AdminCreate, AdminLogin, LockStatusUpdate, Rule
 from app.models.users import UserOut, Enrollment, EnrollmentUpdate
 from app.routers.admin import AdminRouter
 from app.controllers.admin import AdminController
@@ -361,3 +361,66 @@ def test_update_user_enrollment(client: TestClient):
 
     # unwind global state
     enrollments[user_uuid][enrollment_uuid].role = "student"
+
+
+###
+#
+# Rules creation
+#
+###
+def test_create_rule(client: TestClient):
+    res = client.get("/admins/rules", headers=VALID_HEADERS)
+    assert res.status_code == 200
+
+    data = res.json()
+    assert len(data) == 0
+
+    data = Rule(
+        title="title",
+        description="description",
+        effective_date="2025-05-20T15:05:00Z",
+        applicable_conditions=["cond1", "cond2"],
+    )
+
+    res = client.post(
+        "/admins/rules",
+        json=data.model_dump(),
+        headers=VALID_HEADERS,
+    )
+    assert res.status_code == 201
+
+    res = client.get("/admins/rules", headers=VALID_HEADERS)
+    assert res.status_code == 200
+
+    data = res.json()
+    assert len(data) == 1
+
+
+def test_create_rule_with_same_title(client: TestClient):
+    data = Rule(
+        title="title",
+        description="description",
+        effective_date="2025-05-20T15:05:00Z",
+        applicable_conditions=["cond1", "cond2"],
+    )
+
+    res = client.post(
+        "/admins/rules",
+        json=data.model_dump(),
+        headers=VALID_HEADERS,
+    )
+    assert res.status_code == 201
+
+    data = Rule(
+        title="title",
+        description="different description",
+        effective_date="2026-06-21T16-06:01Z",
+        applicable_conditions=["cond3", "cond4", "cond5"],
+    )
+
+    res = client.post(
+        "/admins/rules",
+        json=data.model_dump(),
+        headers=VALID_HEADERS,
+    )
+    assert res.status_code == 409

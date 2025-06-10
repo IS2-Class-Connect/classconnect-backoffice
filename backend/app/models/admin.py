@@ -1,5 +1,5 @@
-import datetime
 from pydantic import BaseModel, EmailStr, Field
+from typing import List
 
 
 class AdminCreate(BaseModel):
@@ -7,11 +7,13 @@ class AdminCreate(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=6)
 
+
 class AdminOut(BaseModel):
     id: str
     username: str
     email: EmailStr
     registration_date: str
+
 
 class AdminLogin(BaseModel):
     email: EmailStr
@@ -25,3 +27,10 @@ class Token(BaseModel):
 
 class LockStatusUpdate(BaseModel):
     locked: bool
+
+
+class Rule(BaseModel):
+    title: str
+    description: str
+    effective_date: str
+    applicable_conditions: List[str]

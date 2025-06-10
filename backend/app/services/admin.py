@@ -1,12 +1,13 @@
-from typing import Optional
+from typing import Optional, override
 from app.databases.db import DB
 from app.exceptions.username_or_email import UsernameEmailInUser
-from app.models.admin import AdminCreate, AdminOut, AdminLogin, Token
+from app.exceptions.rule_title_in_use import TitleAlreadyInUse
+from app.models.admin import AdminCreate, AdminOut, AdminLogin, Token, Rule
 from app.models.users import UserOut, EnrollmentUsers, Enrollment, EnrollmentUpdate
 from app.services.service import Service
-import bcrypt
 from fastapi import HTTPException
 from datetime import datetime, timedelta
+import bcrypt
 import jwt
 import requests
 import logging
@@ -19,6 +20,7 @@ class AdminService(Service):
     def __init__(self, db: DB, gateway_token: str, gateway_url: str, jwt_secret: str):
         self._db = db
         self._admin_coll = "admins"
+        self._rule_coll = "rules"
         self._gateway_token = gateway_token
         self._gateway_url = gateway_url
         self._secret = jwt_secret
@@ -28,6 +30,7 @@ class AdminService(Service):
         hashed = bcrypt.hashpw(password.encode(), salt)
         return hashed.decode()
 
+    @override
     async def create_admin(self, data: AdminCreate) -> AdminOut:
         existing = await self._db.exists_with_username_email(
             self._admin_coll, data.username, data.email
@@ -43,15 +46,18 @@ class AdminService(Service):
         admin = await self._db.create(self._admin_coll, admin_dict)
         return AdminOut(**admin)
 
+    @override
     async def get_admin(self, id: str) -> Optional[AdminOut]:
         admin = await self._db.find_one(self._admin_coll, id)
         return AdminOut(**admin) if admin else None
 
+    @override
     async def get_all_admins(self) -> list[AdminOut]:
         return [
             AdminOut(**admin) for admin in (await self._db.get_all(self._admin_coll))
         ]
 
+    @override
     async def delete_admin(self, id: str):
         return await self._db.delete(self._admin_coll, id)
 
@@ -63,6 +69,7 @@ class AdminService(Service):
         data.update({"exp": expire})
         return jwt.encode(data, self._secret, algorithm=ALGORITHM)
 
+    @override
     async def login_admin(self, credentials: AdminLogin) -> Token:
         admin = await self._db.find_one_by_filter(
             self._admin_coll, {"email": credentials.email}
@@ -76,6 +83,7 @@ class AdminService(Service):
         token = self.create_token({"sub": str(admin["id"]), "email": admin["email"]})
         return Token(access_token=token)
 
+    @override
     async def get_all_users(self) -> list[UserOut]:
         url = f"{self._gateway_url}/admin-backend/users"
         headers = {"Authorization": f"Bearer {self._gateway_token}"}
@@ -89,6 +97,7 @@ class AdminService(Service):
                 status_code=502, detail="Failed to connect to users service"
             )
 
+    @override
     async def get_all_users_enrollment(self) -> list[Enrollment]:
         url = f"{self._gateway_url}/admin-backend/courses/enrollments"
         headers = {"Authorization": f"Bearer {self._gateway_token}"}
@@ -103,6 +112,7 @@ class AdminService(Service):
                 status_code=502, detail="Failed to connect to education service"
             )
 
+    @override
     async def update_user_lock_status(self, uuid: str, locked: bool):
         url = f"{self._gateway_url}/admin-backend/users/{uuid}/lock-status"
         headers = {"Authorization": f"Bearer {self._gateway_token}"}
@@ -119,6 +129,7 @@ class AdminService(Service):
                 status_code=502, detail="Failed to connect to users service"
             )
 
+    @override
     async def update_user_enrollment(
         self, courseId: str, uuid: str, enrollmentData: EnrollmentUpdate
     ):
@@ -137,3 +148,17 @@ class AdminService(Service):
             raise HTTPException(
                 status_code=502, detail="Failed to connect to education service"
             )
+
+    @override
+    async def create_rule(self, data: Rule) -> Rule:
+        existing = await self._db.exists_with_title(self._rule_coll, data.title)
+        if existing:
+            raise TitleAlreadyInUse()
+
+        rule_dict = data.model_dump()
+        rule = await self._db.create(self._rule_coll, rule_dict)
+        return Rule(**rule)
+
+    @override
+    async def get_all_rules(self) -> list[Rule]:
+        return [Rule(**rule) for rule in (await self._db.get_all(self._rule_coll))]
