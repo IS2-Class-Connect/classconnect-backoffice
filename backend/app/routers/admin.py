@@ -1,19 +1,40 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.controllers.admin import AdminController
 from app.controllers.metrics import MetricsController
 from app.models.admin import AdminCreate, AdminOut, AdminLogin, Token
 from app.models.users import UserOut, Enrollment, EnrollmentUpdate
 from app.models.admin import LockStatusUpdate
-from app.auth.auth import get_current_admin
 import logging
+import jwt
+
+security = HTTPBearer()
+ALGORITHM = "HS256"
+
+
+def validate_token_with_secret_key(secret_key: str):
+    def validate_token(
+        credentials: HTTPAuthorizationCredentials = Depends(security),
+    ):
+        token = credentials.credentials
+        try:
+            return jwt.decode(token, secret_key, algorithms=[ALGORITHM])
+        except jwt.PyJWTError:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authentication credentials",
+            )
+
+    return validate_token
 
 
 class AdminRouter:
-    def __init__(self, controller: AdminController):
+    def __init__(self, controller: AdminController, secret_key: str):
         self._controller = controller
         self._metrics_controller = MetricsController()
         self.router = APIRouter(prefix="/admins", tags=["admins"])
-        dependencies = [Depends(get_current_admin)]
+
+        dependencies = [Depends(validate_token_with_secret_key(secret_key))]
 
         self.router.get("/metrics")(self.get_metrics)
         self.router.get(

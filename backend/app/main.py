@@ -61,7 +61,7 @@ async def lifespan(app: FastAPI):
 
     service = AdminService(db, GATEWAY_TOKEN, GATEWAY_URL, JWT_SECRET)
     controller = AdminController(service)
-    admin_router = AdminRouter(controller)
+    admin_router = AdminRouter(controller, JWT_SECRET)
     app.include_router(admin_router.router)
 
     yield

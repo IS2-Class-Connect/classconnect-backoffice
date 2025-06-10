@@ -1,4 +1,3 @@
-import pytest
 from fastapi.testclient import TestClient
 from app.models.admin import AdminCreate, AdminLogin, LockStatusUpdate
 from app.models.users import UserOut, Enrollment, EnrollmentUpdate
@@ -8,6 +7,10 @@ from app.services.admin import AdminService
 from app.services.admin_mock import AdminMockService
 from app.databases.dict import DictDB
 from fastapi import FastAPI
+from datetime import datetime, timedelta
+import pytest
+import jwt
+
 
 users: dict[str, UserOut] = {
     "1": UserOut(
@@ -64,7 +67,7 @@ def app():
     service = AdminService(db, "testing-token", "testing-url", SECRET_KEY)
     mock_service = AdminMockService(service, users, enrollments)
     controller = AdminController(mock_service)
-    router = AdminRouter(controller)
+    router = AdminRouter(controller, SECRET_KEY)
 
     app = FastAPI()
     app.include_router(router.router)
@@ -76,7 +79,12 @@ def client(app: FastAPI):
     return TestClient(app)
 
 
-VALID_HEADERS = {"Authorization": f"Bearer {SECRET_KEY}"}
+def generate_test_token():
+    payload = {"exp": datetime.utcnow() + timedelta(minutes=30)}
+    return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+
+
+VALID_HEADERS = {"Authorization": f"Bearer {generate_test_token()}"}
 
 
 ###
@@ -96,7 +104,7 @@ def test_create_get_admin(client: TestClient):
     assert created["username"] == admin.username
     assert created["email"] == admin.email
 
-    res = client.get(f"/admins/{created['id']}")
+    res = client.get(f"/admins/{created['id']}", headers=VALID_HEADERS)
     getted = res.json()
 
     assert res.status_code == 200
