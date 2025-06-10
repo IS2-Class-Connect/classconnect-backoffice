@@ -8,7 +8,7 @@ from app.models.admin import LockStatusUpdate
 import logging
 import jwt
 
-security = HTTPBearer()
+security = HTTPBearer(auto_error=False)
 ALGORITHM = "HS256"
 
 
@@ -16,8 +16,8 @@ def validate_token_with_secret_key(secret_key: str):
     def validate_token(
         credentials: HTTPAuthorizationCredentials = Depends(security),
     ):
-        token = credentials.credentials
         try:
+            token = credentials.credentials
             return jwt.decode(token, secret_key, algorithms=[ALGORITHM])
         except jwt.PyJWTError:
             raise HTTPException(
@@ -34,35 +34,57 @@ class AdminRouter:
         self._metrics_controller = MetricsController()
         self.router = APIRouter(prefix="/admins", tags=["admins"])
 
-        dependencies = [Depends(validate_token_with_secret_key(secret_key))]
-
+        # Unprotected
         self.router.get("/metrics")(self.get_metrics)
+        self.router.post("/login", response_model=Token)(self.login)
+
+        # Protected
+        dependencies = [Depends(validate_token_with_secret_key(secret_key))]
         self.router.get(
-            "/users", response_model=list[UserOut], dependencies=dependencies
+            "/users",
+            response_model=list[UserOut],
+            dependencies=dependencies,
         )(self.get_all_users)
-        self.router.get("", response_model=list[AdminOut], dependencies=dependencies)(
-            self.get_all_admins
-        )
-        self.router.get("/{id}", response_model=AdminOut, dependencies=dependencies)(
-            self.get_admin
-        )
+
+        self.router.get(
+            "",
+            response_model=list[AdminOut],
+            dependencies=dependencies,
+        )(self.get_all_admins)
+
+        self.router.get(
+            "/{id}",
+            response_model=AdminOut,
+            dependencies=dependencies,
+        )(self.get_admin)
+
         self.router.get(
             "/courses/enrollments",
             response_model=list[Enrollment],
             dependencies=dependencies,
         )(self.get_all_users_enrollment)
-        self.router.post("/login", response_model=Token)(self.login)
+
         self.router.post(
-            "", response_model=AdminOut, status_code=201, dependencies=dependencies
+            "",
+            response_model=AdminOut,
+            status_code=201,
+            dependencies=dependencies,
         )(self.create_admin)
-        self.router.delete("/{id}", status_code=204, dependencies=dependencies)(
-            self.delete_admin
-        )
-        self.router.patch("/users/{uuid}/lock-status", dependencies=dependencies)(
-            self.update_user_lock_status
-        )
+
+        self.router.delete(
+            "/{id}",
+            status_code=204,
+            dependencies=dependencies,
+        )(self.delete_admin)
+
         self.router.patch(
-            "/courses/{courseId}/enrollments/{uuid}", dependencies=dependencies
+            "/users/{uuid}/lock-status",
+            dependencies=dependencies,
+        )(self.update_user_lock_status)
+
+        self.router.patch(
+            "/courses/{courseId}/enrollments/{uuid}",
+            dependencies=dependencies,
         )(self.update_user_enrollment)
 
     async def login(self, login_data: AdminLogin):

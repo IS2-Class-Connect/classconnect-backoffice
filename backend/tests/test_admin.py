@@ -74,17 +74,17 @@ def app():
     return app
 
 
-@pytest.fixture
-def client(app: FastAPI):
-    return TestClient(app)
-
-
 def generate_test_token():
     payload = {"exp": datetime.utcnow() + timedelta(minutes=30)}
     return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
 
 
 VALID_HEADERS = {"Authorization": f"Bearer {generate_test_token()}"}
+
+
+@pytest.fixture
+def client(app: FastAPI):
+    return TestClient(app)
 
 
 ###
@@ -233,9 +233,7 @@ def test_login(client: TestClient):
     assert created["email"] == admin.email
 
     adminLogin = AdminLogin(email="alice@example.com", password="password")
-    res = client.post(
-        "/admins/login", json=adminLogin.model_dump(), headers=VALID_HEADERS
-    )
+    res = client.post("/admins/login", json=adminLogin.model_dump())
 
     assert res.status_code == 200
     assert "access_token" in res.json()
@@ -244,9 +242,7 @@ def test_login(client: TestClient):
 def test_login_failure_invalid_password(client: TestClient):
     adminLogin = AdminLogin(email="alice@example.com", password="incorrectPassword")
 
-    res = client.post(
-        "/admins/login", json=adminLogin.model_dump(), headers=VALID_HEADERS
-    )
+    res = client.post("/admins/login", json=adminLogin.model_dump())
     assert res.status_code == 401
     assert res.json() == {"detail": "Invalid credentials"}
 
@@ -254,9 +250,7 @@ def test_login_failure_invalid_password(client: TestClient):
 def test_login_failure_invalid_email_invalid_password(client: TestClient):
     adminLogin = AdminLogin(email="unknown@example.com", password="incorrectPassword")
 
-    res = client.post(
-        "/admins/login", json=adminLogin.model_dump(), headers=VALID_HEADERS
-    )
+    res = client.post("/admins/login", json=adminLogin.model_dump())
     assert res.status_code == 401
     assert res.json() == {"detail": "Invalid credentials"}
 
