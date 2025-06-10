@@ -1,4 +1,8 @@
 from typing import Optional, override
+from app.models.users import UserOut, Enrollment, EnrollmentUpdate
+from app.services.service import Service
+from app.services.admin import AdminService
+from fastapi import HTTPException
 from app.models.admin import (
     AdminCreate,
     AdminOut,
@@ -6,11 +10,8 @@ from app.models.admin import (
     Token,
     RuleCreate,
     RuleOut,
+    RuleUpdate,
 )
-from app.models.users import UserOut, Enrollment, EnrollmentUpdate
-from app.services.service import Service
-from app.services.admin import AdminService
-from fastapi import HTTPException
 
 
 class AdminMockService(Service):
@@ -79,3 +80,11 @@ class AdminMockService(Service):
     @override
     async def get_all_rules(self) -> list[RuleOut]:
         return await self._inner.get_all_rules()
+
+    @override
+    async def get_rule(self, id: str) -> Optional[RuleOut]:
+        return await self._inner.get_rule(id)
+
+    @override
+    async def update_rule(self, id: str, data: RuleUpdate):
+        return await self._inner.update_rule(id, data)

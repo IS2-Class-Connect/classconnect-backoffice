@@ -1,5 +1,4 @@
 from fastapi.testclient import TestClient
-from app.models.admin import AdminCreate, AdminLogin, LockStatusUpdate, RuleCreate
 from app.models.users import UserOut, Enrollment, EnrollmentUpdate
 from app.routers.admin import AdminRouter
 from app.controllers.admin import AdminController
@@ -8,6 +7,14 @@ from app.services.admin_mock import AdminMockService
 from app.databases.dict import DictDB
 from fastapi import FastAPI
 from datetime import datetime, timedelta
+from app.models.admin import (
+    AdminCreate,
+    AdminLogin,
+    LockStatusUpdate,
+    RuleCreate,
+    RuleOut,
+    RuleUpdate,
+)
 import pytest
 import jwt
 
@@ -368,6 +375,14 @@ def test_update_user_enrollment(client: TestClient):
 # Rules creation
 #
 ###
+base_rule = {
+    "title": "title",
+    "description": "description",
+    "effective_date": "2025-05-20T15:05:00Z",
+    "applicable_conditions": ["cond1", "cond2"],
+}
+
+
 def test_create_rule(client: TestClient):
     res = client.get("/admins/rules", headers=VALID_HEADERS)
     assert res.status_code == 200
@@ -375,16 +390,9 @@ def test_create_rule(client: TestClient):
     data = res.json()
     assert len(data) == 0
 
-    data = RuleCreate(
-        title="title",
-        description="description",
-        effective_date="2025-05-20T15:05:00Z",
-        applicable_conditions=["cond1", "cond2"],
-    )
-
     res = client.post(
         "/admins/rules",
-        json=data.model_dump(),
+        json=base_rule,
         headers=VALID_HEADERS,
     )
     assert res.status_code == 201
@@ -397,30 +405,97 @@ def test_create_rule(client: TestClient):
 
 
 def test_create_rule_with_same_title(client: TestClient):
-    data = RuleCreate(
-        title="title",
-        description="description",
-        effective_date="2025-05-20T15:05:00Z",
-        applicable_conditions=["cond1", "cond2"],
-    )
-
     res = client.post(
         "/admins/rules",
-        json=data.model_dump(),
+        json=base_rule,
         headers=VALID_HEADERS,
     )
     assert res.status_code == 201
 
-    data = RuleCreate(
-        title="title",
-        description="different description",
-        effective_date="2026-06-21T16-06:01Z",
-        applicable_conditions=["cond3", "cond4", "cond5"],
-    )
+    data = {
+        **base_rule,
+        "description": "different description",
+        "effective_date": "2026-06-21T16-06:01Z",
+        "applicable_conditions": ["cond3", "cond4", "cond5"],
+    }
 
     res = client.post(
         "/admins/rules",
-        json=data.model_dump(),
+        json=data,
         headers=VALID_HEADERS,
     )
     assert res.status_code == 409
+
+
+###
+#
+# Rule Updating
+#
+###
+def test_rule_updating_exists(client: TestClient):
+    res = client.post(
+        "/admins/rules",
+        json=base_rule,
+        headers=VALID_HEADERS,
+    )
+
+    id = RuleOut(**res.json()).id
+    new_title = "new title"
+
+    res = client.patch(
+        f"/admins/rules/{id}",
+        json={**base_rule, "title": new_title},
+        headers=VALID_HEADERS,
+    )
+    assert res.status_code == 200
+
+    res = client.get(
+        f"/admins/rules/{id}",
+        headers=VALID_HEADERS,
+    )
+    assert res.status_code == 200
+
+    rule = RuleOut(**res.json())
+    assert rule.title == new_title
+
+
+def test_rule_update_does_not_exist(client: TestClient):
+    id = "some id"
+    new_title = "new title"
+
+    res = client.patch(
+        f"/admins/rules/{id}",
+        json={**base_rule, "title": new_title},
+        headers=VALID_HEADERS,
+    )
+    assert res.status_code == 404
+
+
+def test_rule_update_partial_data(client: TestClient):
+    res = client.post(
+        "/admins/rules",
+        json=base_rule,
+        headers=VALID_HEADERS,
+    )
+
+    id = RuleOut(**res.json()).id
+    new_title = "new title"
+
+    res = client.patch(
+        f"/admins/rules/{id}",
+        json={"title": new_title},
+        headers=VALID_HEADERS,
+    )
+    assert res.status_code == 200
+
+    res = client.get(
+        f"/admins/rules/{id}",
+        headers=VALID_HEADERS,
+    )
+    assert res.status_code == 200
+
+    rule = RuleOut(**res.json())
+    assert rule.title == new_title
+    assert rule.description == base_rule["description"]
+    assert rule.effective_date == base_rule["effective_date"]
+    assert rule.applicable_conditions == base_rule["applicable_conditions"]

@@ -38,9 +38,32 @@ class MongoDB(DB):
         return await self._try(inner)
 
     @override
+    async def update(self, collection: str, id: str, data: dict[str, Any]) -> bool:
+        async def inner():
+            result = await self._db[collection].update_one(
+                {"_id": self._objectid(id)},
+                {"$set": data},
+            )
+            return result.did_upsert
+
+        return await self._try(inner)
+
+    @override
     async def find_one(self, collection: str, id: str) -> Optional[dict[str, Any]]:
         async def inner():
             document = await self._db[collection].find_one({"_id": self._objectid(id)})
+            if document:
+                document["id"] = str(document["_id"])
+            return document
+
+        return await self._try(inner)
+
+    @override
+    async def find_one_by_filter(
+        self, collection: str, filter: dict[str, Any]
+    ) -> Optional[dict[str, Any]]:
+        async def inner():
+            document = await self._db[collection].find_one(filter)
             if document:
                 document["id"] = str(document["_id"])
             return document
@@ -60,18 +83,6 @@ class MongoDB(DB):
         return await self._try(inner)
 
     @override
-    async def exists_with_username_email(
-        self, collection: str, username: str, email: str
-    ) -> bool:
-        async def inner():
-            document = await self._db[collection].find_one(
-                {"$or": [{"username": username}, {"email": email}]}
-            )
-            return document is not None
-
-        return await self._try(inner)
-
-    @override
     async def delete(self, collection: str, id: str) -> bool:
         async def inner():
             result = await self._db[collection].delete_one({"_id": self._objectid(id)})
@@ -80,14 +91,14 @@ class MongoDB(DB):
         return await self._try(inner)
 
     @override
-    async def find_one_by_filter(
-        self, collection: str, filter: dict[str, Any]
-    ) -> Optional[dict[str, Any]]:
+    async def exists_with_username_email(
+        self, collection: str, username: str, email: str
+    ) -> bool:
         async def inner():
-            document = await self._db[collection].find_one(filter)
-            if document:
-                document["id"] = str(document["_id"])
-            return document
+            document = await self._db[collection].find_one(
+                {"$or": [{"username": username}, {"email": email}]}
+            )
+            return document is not None
 
         return await self._try(inner)
 

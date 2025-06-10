@@ -20,12 +20,34 @@ class DictDB(DB):
         return full_data
 
     @override
+    async def update(self, collection: str, id: str, data: dict[str, Any]) -> bool:
+        value = self._db[collection].get(id)
+        if not value:
+            return False
+
+        self._db[collection][id] = {**value, **data}
+        return True
+
+    @override
     async def find_one(self, collection: str, id: str) -> Optional[dict[str, Any]]:
         return self._db[collection].get(id)
 
     @override
+    async def find_one_by_filter(
+        self, collection: str, filter: dict[str, Any]
+    ) -> Optional[dict[str, Any]]:
+        for doc in self._db[collection].values():
+            if all(doc.get(k) == v for k, v in filter.items()):
+                return doc
+        return None
+
+    @override
     async def get_all(self, collection: str) -> list[dict[str, Any]]:
         return list(self._db[collection].values())
+
+    @override
+    async def delete(self, collection: str, id: str) -> bool:
+        return self._db[collection].pop(id, None) is not None
 
     @override
     async def exists_with_username_email(
@@ -37,19 +59,6 @@ class DictDB(DB):
             if doc.get("email") == email:
                 return True
         return False
-
-    @override
-    async def delete(self, collection: str, id: str) -> bool:
-        return self._db[collection].pop(id, None) is not None
-
-    @override
-    async def find_one_by_filter(
-        self, collection: str, filter: dict[str, Any]
-    ) -> Optional[dict[str, Any]]:
-        for doc in self._db[collection].values():
-            if all(doc.get(k) == v for k, v in filter.items()):
-                return doc
-        return None
 
     @override
     async def exists_with_title(self, collection: str, title: str) -> bool:

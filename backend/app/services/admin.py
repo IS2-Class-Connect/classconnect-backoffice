@@ -13,6 +13,7 @@ from app.models.admin import (
     Token,
     RuleCreate,
     RuleOut,
+    RuleUpdate,
 )
 import bcrypt
 import jwt
@@ -169,3 +170,14 @@ class AdminService(Service):
     @override
     async def get_all_rules(self) -> list[RuleOut]:
         return [RuleOut(**rule) for rule in (await self._db.get_all(self._rule_coll))]
+
+    @override
+    async def get_rule(self, id: str) -> Optional[RuleOut]:
+        rule = await self._db.find_one(self._rule_coll, id)
+        return RuleOut(**rule) if rule else None
+
+    @override
+    async def update_rule(self, id: str, data: RuleUpdate):
+        rule_dict = data.model_dump(exclude_unset=True)
+        if not await self._db.update(self._rule_coll, id, rule_dict):
+            raise HTTPException(404, "The provided rule id doesn't exist")

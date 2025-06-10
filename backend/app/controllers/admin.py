@@ -8,6 +8,7 @@ from app.models.admin import (
     Token,
     RuleCreate,
     RuleOut,
+    RuleUpdate,
 )
 from app.models.users import UserOut, Enrollment, EnrollmentUpdate
 from app.services.service import Service
@@ -72,3 +73,16 @@ class AdminController:
 
     async def get_all_rules(self) -> list[RuleOut]:
         return await self._service.get_all_rules()
+
+    async def get_rule(self, id: str) -> RuleOut:
+        try:
+            rule = await self._service.get_rule(id)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        if rule is None:
+            raise HTTPException(status_code=404, detail="Rule not found")
+
+        return rule
+
+    async def update_rule(self, id: str, rule: RuleUpdate):
+        return await self._service.update_rule(id, rule)

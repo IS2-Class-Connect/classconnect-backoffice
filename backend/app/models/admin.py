@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field
-from typing import List
+from typing import List, Optional
 
 
 class AdminCreate(BaseModel):
@@ -38,3 +38,10 @@ class RuleCreate(BaseModel):
 
 class RuleOut(RuleCreate):
     id: str
+
+
+class RuleUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    effective_date: Optional[str] = None
+    applicable_conditions: Optional[List[str]] = None
