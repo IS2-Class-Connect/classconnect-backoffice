@@ -11,17 +11,17 @@ import jwt
 import requests
 import logging
 
-SECRET_KEY = "secret"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
 class AdminService(Service):
-    def __init__(self, db: DB, gateway_token: str, gateway_url: str):
+    def __init__(self, db: DB, gateway_token: str, gateway_url: str, jwt_secret: str):
         self._db = db
         self._admin_coll = "admins"
         self._gateway_token = gateway_token
         self._gateway_url = gateway_url
+        self._secret = jwt_secret
 
     def hash_password(self, password: str) -> str:
         salt = bcrypt.gensalt()
@@ -61,7 +61,7 @@ class AdminService(Service):
     def create_token(self, data: dict) -> str:
         expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         data.update({"exp": expire})
-        return jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
+        return jwt.encode(data, self._secret, algorithm=ALGORITHM)
 
     async def login_admin(self, credentials: AdminLogin) -> Token:
         admin = await self._db.find_one_by_filter(

@@ -1,4 +1,3 @@
-import pytest
 from fastapi.testclient import TestClient
 from app.models.admin import AdminCreate, AdminLogin, LockStatusUpdate
 from app.models.users import UserOut, Enrollment, EnrollmentUpdate
@@ -8,6 +7,10 @@ from app.services.admin import AdminService
 from app.services.admin_mock import AdminMockService
 from app.databases.dict import DictDB
 from fastapi import FastAPI
+from datetime import datetime, timedelta
+import pytest
+import jwt
+
 
 users: dict[str, UserOut] = {
     "1": UserOut(
@@ -55,23 +58,43 @@ enrollments: dict[str, dict[str, Enrollment]] = {
     },
 }
 
+SECRET_KEY = "testing"
+
 
 @pytest.fixture
 def app():
     db = DictDB()
-    service = AdminService(db, "testing-token", "testing-url")
+    service = AdminService(db, "testing-token", "testing-url", SECRET_KEY)
     mock_service = AdminMockService(service, users, enrollments)
     controller = AdminController(mock_service)
-    router = AdminRouter(controller)
+    router = AdminRouter(controller, SECRET_KEY)
 
     app = FastAPI()
     app.include_router(router.router)
     return app
 
 
+def generate_test_token():
+    payload = {"exp": datetime.utcnow() + timedelta(minutes=30)}
+    return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+
+
+VALID_HEADERS = {"Authorization": f"Bearer {generate_test_token()}"}
+
+
 @pytest.fixture
 def client(app: FastAPI):
     return TestClient(app)
+
+
+###
+#
+# Auth
+#
+###
+def test_hitting_endpoint_without_token(client: TestClient):
+    res = client.get("/admins")
+    assert res.status_code == 401
 
 
 ###
@@ -84,14 +107,14 @@ def test_create_get_admin(client: TestClient):
         username="alice", email="alice@example.com", password="password"
     )
 
-    res = client.post("/admins", json=admin.model_dump())
+    res = client.post("/admins", json=admin.model_dump(), headers=VALID_HEADERS)
     created = res.json()
 
     assert res.status_code == 201
     assert created["username"] == admin.username
     assert created["email"] == admin.email
 
-    res = client.get(f"/admins/{created['id']}")
+    res = client.get(f"/admins/{created['id']}", headers=VALID_HEADERS)
     getted = res.json()
 
     assert res.status_code == 200
@@ -106,7 +129,7 @@ def test_create_missing_fields(client: TestClient):
         "password": "12345678",
     }
 
-    res = client.post("/admins", json=payload)
+    res = client.post("/admins", json=payload, headers=VALID_HEADERS)
     assert res.status_code == 422
 
     # No email
@@ -115,7 +138,7 @@ def test_create_missing_fields(client: TestClient):
         "password": "12345678",
     }
 
-    res = client.post("/admins", json=payload)
+    res = client.post("/admins", json=payload, headers=VALID_HEADERS)
     assert res.status_code == 422
 
     # No password
@@ -124,19 +147,19 @@ def test_create_missing_fields(client: TestClient):
         "email": "alice@example.com",
     }
 
-    res = client.post("/admins", json=payload)
+    res = client.post("/admins", json=payload, headers=VALID_HEADERS)
     assert res.status_code == 422
 
 
 def test_duplicate_username_or_email(client: TestClient):
     admin = AdminCreate(username="dave", email="dave@example.com", password="password")
-    client.post("/admins", json=admin.model_dump())
+    client.post("/admins", json=admin.model_dump(), headers=VALID_HEADERS)
 
     same_username = AdminCreate(
         username="dave", email="different@example.com", password="password"
     )
 
-    res = client.post("/admins", json=same_username.model_dump())
+    res = client.post("/admins", json=same_username.model_dump(), headers=VALID_HEADERS)
     assert res.status_code == 409
     assert res.json() == {"detail": "Username or email already exists"}
 
@@ -144,7 +167,7 @@ def test_duplicate_username_or_email(client: TestClient):
         username="different", email="dave@example.com", password="password"
     )
 
-    res = client.post("/admins", json=same_email.model_dump())
+    res = client.post("/admins", json=same_email.model_dump(), headers=VALID_HEADERS)
     assert res.status_code == 409
     assert res.json() == {"detail": "Username or email already exists"}
 
@@ -155,7 +178,7 @@ def test_duplicate_username_or_email(client: TestClient):
 #
 ###
 def test_get_admin_not_found(client: TestClient):
-    res = client.get("/admins/0")
+    res = client.get("/admins/0", headers=VALID_HEADERS)
     assert res.status_code == 404
 
 
@@ -166,9 +189,9 @@ def test_get_all_admins(client: TestClient):
     ]
 
     for admin in admins:
-        client.post("/admins", json=admin.model_dump())
+        client.post("/admins", json=admin.model_dump(), headers=VALID_HEADERS)
 
-    res = client.get("/admins")
+    res = client.get("/admins", headers=VALID_HEADERS)
     getted = res.json()
 
     assert res.status_code == 200
@@ -185,20 +208,20 @@ def test_delete_admin(client: TestClient):
     admin = AdminCreate(
         username="admin", email="admin@example.com", password="password"
     )
-    res = client.post("/admins", json=admin.model_dump())
+    res = client.post("/admins", json=admin.model_dump(), headers=VALID_HEADERS)
     created = res.json()
     id = created["id"]
 
-    res = client.delete(f"/admins/{id}")
+    res = client.delete(f"/admins/{id}", headers=VALID_HEADERS)
     assert res.status_code == 204
 
-    res = client.get(f"/admins/{id}")
+    res = client.get(f"/admins/{id}", headers=VALID_HEADERS)
     assert res.status_code == 404
     assert res.json() == {"detail": "Admin not found"}
 
 
 def test_delete_admin_not_found(client: TestClient):
-    res = client.delete("/admins/0")
+    res = client.delete("/admins/0", headers=VALID_HEADERS)
     assert res.status_code == 404
 
 
@@ -212,7 +235,7 @@ def test_login(client: TestClient):
         username="alice", email="alice@example.com", password="password"
     )
 
-    res = client.post("/admins", json=admin.model_dump())
+    res = client.post("/admins", json=admin.model_dump(), headers=VALID_HEADERS)
     created = res.json()
 
     assert res.status_code == 201
@@ -248,7 +271,7 @@ def test_login_failure_invalid_email_invalid_password(client: TestClient):
 #
 ###
 def test_get_all_users(client: TestClient):
-    response = client.get("/admins/users")
+    response = client.get("/admins/users", headers=VALID_HEADERS)
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)
@@ -268,7 +291,11 @@ def test_lock_status(client: TestClient):
     assert not users[uuid].accountLockedByAdmins
 
     data = LockStatusUpdate(locked=True)
-    res = client.patch(f"/admins/users/{uuid}/lock-status", json=data.model_dump())
+    res = client.patch(
+        f"/admins/users/{uuid}/lock-status",
+        json=data.model_dump(),
+        headers=VALID_HEADERS,
+    )
 
     assert res.status_code == 200
     assert users[uuid].accountLockedByAdmins
@@ -281,7 +308,11 @@ def test_lock_status_invalid_id(client: TestClient):
     uuid = "123456789"
 
     data = LockStatusUpdate(locked=True)
-    res = client.patch(f"/admins/users/{uuid}/lock-status", json=data.model_dump())
+    res = client.patch(
+        f"/admins/users/{uuid}/lock-status",
+        json=data.model_dump(),
+        headers=VALID_HEADERS,
+    )
 
     assert res.status_code == 404
 
@@ -292,7 +323,7 @@ def test_lock_status_invalid_id(client: TestClient):
 #
 ###
 def test_get_all_users_enrollment(client: TestClient):
-    response = client.get("/admins/courses/enrollments")
+    response = client.get("/admins/courses/enrollments", headers=VALID_HEADERS)
     assert response.status_code == 200
 
     data = response.json()
@@ -322,6 +353,7 @@ def test_update_user_enrollment(client: TestClient):
     res = client.patch(
         f"/admins/courses/{enrollment_uuid}/enrollments/{user_uuid}",
         json=data.model_dump(),
+        headers=VALID_HEADERS,
     )
 
     assert res.status_code == 200
