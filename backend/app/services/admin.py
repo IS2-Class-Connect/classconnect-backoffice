@@ -168,7 +168,7 @@ class AdminService(Service):
     @override
     async def notify_rules(self):
         rules = await self.get_all_rules()
-        endpoint = "/rules"
+        endpoint = "/email/rules"
         data = RulePacket(rules=rules).model_dump()
         await self._send_to_gateway(requests.post, endpoint, json=data)
         logging.info("sent notification for rules")
