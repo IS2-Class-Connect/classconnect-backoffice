@@ -1,7 +1,15 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
-from app.models.admin import AdminCreate, AdminLogin, AdminOut, Token
 from app.models.users import UserOut, EnrollmentUpdate, Enrollment
+from app.models.admin import (
+    AdminCreate,
+    AdminLogin,
+    AdminOut,
+    Token,
+    RuleCreate,
+    RuleOut,
+    RuleUpdate,
+)
 
 
 class Service(ABC):
@@ -41,4 +49,24 @@ class Service(ABC):
     async def update_user_enrollment(
         self, courseId: str, uuid: str, enrollmentData: EnrollmentUpdate
     ):
+        pass
+
+    @abstractmethod
+    async def create_rule(self, data: RuleCreate) -> RuleOut:
+        pass
+
+    @abstractmethod
+    async def get_all_rules(self) -> list[RuleOut]:
+        pass
+
+    @abstractmethod
+    async def get_rule(self, id: str) -> Optional[RuleOut]:
+        pass
+
+    @abstractmethod
+    async def update_rule(self, id: str, admin_name: str, data: RuleUpdate):
+        pass
+
+    @abstractmethod
+    async def notify_rules(self):
         pass

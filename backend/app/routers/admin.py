@@ -2,9 +2,17 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.controllers.admin import AdminController
 from app.controllers.metrics import MetricsController
-from app.models.admin import AdminCreate, AdminOut, AdminLogin, Token
+from app.models.admin import (
+    AdminCreate,
+    AdminOut,
+    AdminLogin,
+    Token,
+    LockStatusUpdate,
+    RuleCreate,
+    RuleOut,
+    RuleUpdateWithAdminName,
+)
 from app.models.users import UserOut, Enrollment, EnrollmentUpdate
-from app.models.admin import LockStatusUpdate
 import logging
 import jwt
 
@@ -59,10 +67,17 @@ class AdminRouter:
         )(self.get_all_admins)
 
         self.router.get(
-            "/{id}",
-            response_model=AdminOut,
+            "/rules",
             dependencies=dependencies,
-        )(self.get_admin)
+            response_model=list[RuleOut],
+        )(self.get_all_rules)
+
+        self.router.post(
+            "/rules",
+            status_code=201,
+            dependencies=dependencies,
+            response_model=RuleOut,
+        )(self.create_rule)
 
         self.router.get(
             "/courses/enrollments",
@@ -76,6 +91,12 @@ class AdminRouter:
             status_code=201,
             dependencies=dependencies,
         )(self.create_admin)
+
+        self.router.post(
+            "/rules/notify",
+            status_code=204,
+            dependencies=dependencies,
+        )(self.notify_rules)
 
         self.router.delete(
             "/{id}",
@@ -92,6 +113,23 @@ class AdminRouter:
             "/courses/{courseId}/enrollments/{uuid}",
             dependencies=dependencies,
         )(self.update_user_enrollment)
+
+        self.router.get(
+            "/{id}",
+            response_model=AdminOut,
+            dependencies=dependencies,
+        )(self.get_admin)
+
+        self.router.get(
+            "/rules/{id}",
+            response_model=RuleOut,
+            dependencies=dependencies,
+        )(self.get_rule)
+
+        self.router.patch(
+            "/rules/{id}",
+            dependencies=dependencies,
+        )(self.update_rule)
 
     async def login(self, login_data: AdminLogin):
         logging.info(f"Trying to login for admin {login_data.email}")
@@ -136,3 +174,25 @@ class AdminRouter:
 
     async def get_metrics(self):
         return self._metrics_controller.get_metrics()
+
+    async def create_rule(self, rule: RuleCreate):
+        logging.info(f"Trying to create a new rule with title {rule.title}")
+        return await self._controller.create_rule(rule)
+
+    async def get_all_rules(self):
+        logging.info("Trying to get all rules")
+        return await self._controller.get_all_rules()
+
+    async def update_rule(self, id: str, update: RuleUpdateWithAdminName):
+        admin_name = update.admin_name
+        rule_update = update.update
+        logging.info(f"Trying to update rule with id: {id}, by {admin_name}")
+        return await self._controller.update_rule(id, admin_name, rule_update)
+
+    async def get_rule(self, id: str):
+        logging.info(f"Trying to get rule with id: {id}")
+        return await self._controller.get_rule(id)
+
+    async def notify_rules(self):
+        logging.info(f"Trying to notify rules")
+        return await self._controller.notify_rules()

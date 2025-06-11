@@ -1,6 +1,15 @@
 from fastapi import HTTPException
 from app.exceptions.username_or_email import UsernameEmailInUser
-from app.models.admin import AdminCreate, AdminOut, AdminLogin, Token
+from app.exceptions.rule_title_in_use import TitleAlreadyInUse
+from app.models.admin import (
+    AdminCreate,
+    AdminOut,
+    AdminLogin,
+    Token,
+    RuleCreate,
+    RuleOut,
+    RuleUpdate,
+)
 from app.models.users import UserOut, Enrollment, EnrollmentUpdate
 from app.services.service import Service
 
@@ -11,8 +20,7 @@ class AdminController:
 
     async def create_admin(self, admin: AdminCreate) -> AdminOut:
         try:
-            created_admin = await self._service.create_admin(admin)
-            return created_admin
+            return await self._service.create_admin(admin)
         except UsernameEmailInUser as e:
             raise HTTPException(status_code=409, detail=str(e))
 
@@ -56,3 +64,28 @@ class AdminController:
         return await self._service.update_user_enrollment(
             uuid, courseId, enrollmentData
         )
+
+    async def create_rule(self, rule: RuleCreate) -> RuleOut:
+        try:
+            return await self._service.create_rule(rule)
+        except TitleAlreadyInUse as e:
+            raise HTTPException(status_code=409, detail=str(e))
+
+    async def get_all_rules(self) -> list[RuleOut]:
+        return await self._service.get_all_rules()
+
+    async def get_rule(self, id: str) -> RuleOut:
+        try:
+            rule = await self._service.get_rule(id)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        if rule is None:
+            raise HTTPException(status_code=404, detail="Rule not found")
+
+        return rule
+
+    async def update_rule(self, id: str, admin_name: str, rule: RuleUpdate):
+        return await self._service.update_rule(id, admin_name, rule)
+
+    async def notify_rules(self):
+        return await self._service.notify_rules()

@@ -1,13 +1,20 @@
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from app.models.admin import AdminCreate, AdminLogin, LockStatusUpdate
 from app.models.users import UserOut, Enrollment, EnrollmentUpdate
 from app.routers.admin import AdminRouter
 from app.controllers.admin import AdminController
 from app.services.admin import AdminService
 from app.services.admin_mock import AdminMockService
 from app.databases.dict import DictDB
-from fastapi import FastAPI
 from datetime import datetime, timedelta
+from collections import deque
+from app.models.admin import (
+    AdminCreate,
+    AdminLogin,
+    LockStatusUpdate,
+    RuleOut,
+    RulePacket,
+)
 import pytest
 import jwt
 
@@ -58,6 +65,8 @@ enrollments: dict[str, dict[str, Enrollment]] = {
     },
 }
 
+notification_channel: deque[RulePacket] = deque()
+
 SECRET_KEY = "testing"
 
 
@@ -65,7 +74,7 @@ SECRET_KEY = "testing"
 def app():
     db = DictDB()
     service = AdminService(db, "testing-token", "testing-url", SECRET_KEY)
-    mock_service = AdminMockService(service, users, enrollments)
+    mock_service = AdminMockService(service, users, enrollments, notification_channel)
     controller = AdminController(mock_service)
     router = AdminRouter(controller, SECRET_KEY)
 
@@ -361,3 +370,172 @@ def test_update_user_enrollment(client: TestClient):
 
     # unwind global state
     enrollments[user_uuid][enrollment_uuid].role = "student"
+
+
+###
+#
+# Rules creation
+#
+###
+base_rule = {
+    "admin_name": "name",
+    "title": "title",
+    "description": "description",
+    "effective_date": "2025-05-20T15:05:00Z",
+    "applicable_conditions": ["cond1", "cond2"],
+}
+
+
+def test_create_rule(client: TestClient):
+    res = client.get("/admins/rules", headers=VALID_HEADERS)
+    assert res.status_code == 200
+
+    data = res.json()
+    assert len(data) == 0
+
+    res = client.post(
+        "/admins/rules",
+        json=base_rule,
+        headers=VALID_HEADERS,
+    )
+    assert res.status_code == 201
+
+    res = client.get("/admins/rules", headers=VALID_HEADERS)
+    assert res.status_code == 200
+
+    data = res.json()
+    assert len(data) == 1
+
+
+def test_create_rule_with_same_title(client: TestClient):
+    res = client.post(
+        "/admins/rules",
+        json=base_rule,
+        headers=VALID_HEADERS,
+    )
+    assert res.status_code == 201
+
+    data = {
+        **base_rule,
+        "description": "different description",
+        "effective_date": "2026-06-21T16-06:01Z",
+        "applicable_conditions": ["cond3", "cond4", "cond5"],
+    }
+
+    res = client.post(
+        "/admins/rules",
+        json=data,
+        headers=VALID_HEADERS,
+    )
+    assert res.status_code == 409
+
+
+###
+#
+# Rule Updating
+#
+###
+base_update = {
+    "admin_name": "name",
+    "update": base_rule,
+}
+
+
+def test_rule_updating_exists(client: TestClient):
+    res = client.post(
+        "/admins/rules",
+        json=base_rule,
+        headers=VALID_HEADERS,
+    )
+
+    id = RuleOut(**res.json()).id
+    new_title = "new title"
+
+    res = client.patch(
+        f"/admins/rules/{id}",
+        json={**base_update, "update": {**base_rule, "title": new_title}},
+        headers=VALID_HEADERS,
+    )
+    assert res.status_code == 200
+
+    res = client.get(
+        f"/admins/rules/{id}",
+        headers=VALID_HEADERS,
+    )
+    assert res.status_code == 200
+
+    rule = RuleOut(**res.json())
+    assert rule.title == new_title
+
+
+def test_rule_update_does_not_exist(client: TestClient):
+    id = "some id"
+    new_title = "new title"
+
+    res = client.patch(
+        f"/admins/rules/{id}",
+        json={**base_update, "update": {**base_rule, "title": new_title}},
+        headers=VALID_HEADERS,
+    )
+    assert res.status_code == 404
+
+
+def test_rule_update_partial_data(client: TestClient):
+    res = client.post(
+        "/admins/rules",
+        json=base_rule,
+        headers=VALID_HEADERS,
+    )
+
+    id = RuleOut(**res.json()).id
+    new_title = "new title"
+
+    res = client.patch(
+        f"/admins/rules/{id}",
+        json={"admin_name": "name", "update": {"title": new_title}},
+        headers=VALID_HEADERS,
+    )
+    assert res.status_code == 200
+
+    res = client.get(
+        f"/admins/rules/{id}",
+        headers=VALID_HEADERS,
+    )
+    assert res.status_code == 200
+
+    rule = RuleOut(**res.json())
+    assert rule.title == new_title
+    assert rule.description == base_rule["description"]
+    assert rule.effective_date == base_rule["effective_date"]
+    assert rule.applicable_conditions == base_rule["applicable_conditions"]
+
+
+###
+#
+# Rule Notification
+#
+###
+def test_sending_notifications_empty(client: TestClient):
+    res = client.post("/admins/rules/notify", headers=VALID_HEADERS)
+    assert res.status_code == 204
+    assert len(notification_channel) == 1
+
+    pkt = notification_channel.popleft()
+    assert len(pkt.rules) == 0
+
+
+def test_sending_notifications(client: TestClient):
+    res = client.post(
+        "/admins/rules",
+        json=base_rule,
+        headers=VALID_HEADERS,
+    )
+    assert res.status_code == 201
+
+    res = client.post("/admins/rules/notify", headers=VALID_HEADERS)
+    assert res.status_code == 204
+
+    assert len(notification_channel) == 1
+
+    pkt = notification_channel.popleft()
+    assert len(pkt.rules) == 1
