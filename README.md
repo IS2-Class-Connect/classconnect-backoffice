@@ -4,11 +4,12 @@
 
 ## 📚 Table of Contents
 
-- [Features](#-features)
-- [Tech Stack](#-tech-stack)
-- [Getting Started](#-getting-started)
-- [Project Structure](#-project-structure)
-- [License](#️-license)
+- [Features](<README#🔧 Features>)
+- [Tech Stack](<README#🧱 Tech Stack>)
+- [Getting Started](<README#🚀 Getting Started>)
+- [Project Structure](<README#📁 Project Structure>)
+- [License](<README#✍️ License>)
+- [Codecov](README#codecov)
 
 ## 🔧 Features
 
@@ -41,12 +42,12 @@
 
 #### Endpoints
 
-Here are some curl examples for every endpoint implemented.
+Here are some curl examples for some endpoints implemented.
 
 To create a new admin use `POST /admins`
 ```sh
-curl -X 'POST' \
-  'http://localhost:3004/admins' \
+curl -X POST 'http://localhost:3004/admins' \
+  -H 'Authorization: Bearer {token}' \
   -H 'Content-Type: application/json' \
   -d '{
     "username": "username",
@@ -57,32 +58,31 @@ curl -X 'POST' \
 
 To get a list of all the admins in the system use `GET /admins`
 ```sh
-curl -X GET "http://localhost:3004/admins" \
-  -H 'Content-Type: application/json'
+curl 'http://localhost:3004/admins' \
+  -H 'Authorization: Bearer {token}'
 ```
 
 To get a certain admin use `GET /admins/:id`
 ```sh
-curl -X GET "http://localhost:3004/admins/{id}" \
-  -H 'Content-Type: application/json'
+curl 'http://localhost:3004/admins/{id}' \
+  -H 'Authorization: Bearer {token}'
 ```
 
 To delete a certain admin use `DELETE /admins/:id`
 ```sh
-curl -X DELETE \
-  "http://localhost:3004/admins/{id}" \
-  -H 'Content-Type: application/json'
+curl -X DELETE 'http://localhost:3004/admins/{id}' \
+  -H 'Authorization: Bearer {token}'
 ```
 
 To login admins: 
 ```sh
-curl --location 'http://localhost:3004/admins/login' \
---header 'Content-Type: application/json' \
---data-raw '{
+curl -X POST 'http://localhost:3004/admins/login' \
+  -H 'Authorization: Bearer {token}' \
+  -H 'Content-Type: application/json' \
+  -d '{
   "email": "admin123@example.com",
   "password": "securepassword"
-}
-'
+}'
 ```
 
 ### DevOps
@@ -99,22 +99,19 @@ curl --location 'http://localhost:3004/admins/login' \
 ### Clone the repository
 
 ```bash
-git clone https://github.com/your-org/classconnect-backoffice.git
-cd classconnect-backoffice
+git clone <repo-url> backoffice
 ```
 
 ### Run the entire stack
 
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
 
 Visit:
 
 - 🌐 Frontend: http://localhost:5173  
-- 🔙 Backend API: http://localhost:8000  
-- 📈 Prometheus: http://localhost:9090  
-- 📊 Grafana: http://localhost:3000 (default login: `admin` / `admin`)
+- 🔙 Backend API: http://localhost:3004  
 
 ## 📁 Project Structure
 
@@ -122,8 +119,6 @@ Visit:
 classconnect-backoffice/
 ├── backend/            # FastAPI app
 ├── frontend/           # React admin panel
-├── prometheus/         # Prometheus config
-├── grafana/            # Grafana dashboards (optional)
 └── docker-compose.yml  # Docker orchestration
 ```
 
