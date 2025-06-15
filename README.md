@@ -87,8 +87,6 @@ curl -X POST 'http://localhost:3004/admins/login' \
 
 ### DevOps
 - Docker & Docker Compose
-- Prometheus
-- Grafana
 
 ## 🚀 Getting Started
 
