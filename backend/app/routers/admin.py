@@ -51,6 +51,7 @@ class AdminRouter:
         # Unprotected
         self.router.get("/metrics")(self.get_metrics)
         self.router.post("/login", response_model=Token)(self.login)
+        self.router.get("/rules", response_model=list[RuleOut])(self.get_all_rules)
 
         # Protected
         dependencies = [Depends(validate_token_with_secret_key(secret_key))]
@@ -65,12 +66,6 @@ class AdminRouter:
             response_model=list[AdminOut],
             dependencies=dependencies,
         )(self.get_all_admins)
-
-        self.router.get(
-            "/rules",
-            dependencies=dependencies,
-            response_model=list[RuleOut],
-        )(self.get_all_rules)
 
         self.router.post(
             "/rules",
