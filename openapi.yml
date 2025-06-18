@@ -1,4 +1,4 @@
-openapi: 3.0.0
+openapi: 3.0.3
 info:
   title: Admins API
   description: API to manage admin data.
@@ -35,19 +35,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ERROR'
-        '500':
-          description: Internal server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ERROR'
 
     get:
       summary: Get all admins.
       description: Returns a list of all the admins and their details.
       operationId: get_all_admins
       responses:
-        '202':
+        '200':
           description: List of admin details.
           content:
             application/json:
@@ -55,17 +49,11 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/AdminOut'
-        '500':
-          description: Internal server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ERROR'
 
   /admins/{id}:
     get:
-      summary: Get user by id.
-      description: Retrieves user information by id.
+      summary: Get admin by id.
+      description: Retrieves admin information by id.
       operationId: get_admin
       parameters:
         - in: path
@@ -84,12 +72,6 @@ paths:
                 $ref: '#/components/schemas/AdminOut'
         '404':
           description: Admin not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ERROR'
-        '500':
-          description: Internal server error.
           content:
             application/json:
               schema:
@@ -176,6 +158,233 @@ paths:
                 $ref: '#/components/schemas/ERROR'
               example:
                 detail: Server error during login
+  /admins/metrics:
+    get:
+      summary: Get the metrics of the service.
+      description: Returns metric information for Prometheus server.
+      operationId: get_metrics
+      responses:
+        '200':
+          description: Metric information
+  /admins/users:
+    get:
+      summary: Get all users.
+      description: Returns a list of all the users and their details.
+      operationId: get_all_users
+      responses:
+        '200':
+          description: List of user details.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserOut'
+        '500':
+          description: Failed to reach users service.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ERROR'
+
+  /admins/users/{uuid}/lock-status:
+    patch:
+      summary: Lock or unlock a user from the application.
+      description: An admin in the platform can lock or unlock a certain user from using the application.
+      operationId: update_user_lock_status
+      parameters:
+        - in: path
+          name: uuid
+          required: true
+          description: Id of the user to toggle lock status.
+          schema:
+            type: string
+            example: "681293f60d3eebd21ae7dad4"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - locked
+              properties:
+                locked:
+                  type: boolean
+      responses:
+        '200':
+          description: Succesfully toggled user's lock status.
+        '500':
+          description: Failed to reach users service.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ERROR'
+
+  /admins/rules:
+    get:
+      summary: Gets all the rules of the application.
+      description: Retrieves all the rules and policies.
+      operationId: get_all_rules
+      responses:
+        '200':
+          description: Successfully retrieved rules and policies.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RuleOut'
+
+    post:
+      summary: Post a new rule.
+      description: Add a new rule to the application.
+      operationId: create_rule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RuleCreate'
+      responses:
+        '201':
+          description: Successfuly created a new rule.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleOut'
+        '409':
+          description: Title already in use by another rule.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ERROR'
+
+  /admins/rules/{id}:
+    get:
+      summary: Get a rule by id.
+      description: Retrieves rule information by id.
+      operationId: get_rule
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: Id of the rule to retrieve.
+          schema:
+            type: string
+            example: "681293f60d3eebd21ae7dad4"
+      responses:
+        '200':
+          description: Rule found successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleOut'
+        '404':
+          description: Rule not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ERROR'
+    patch:
+      summary: Modify a rule.
+      description: Modify the information of a certain rule given an id.
+      operationId: update_rule
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: Id of the rule to update.
+          schema:
+            type: string
+            example: "681293f60d3eebd21ae7dad4"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RuleUpdateWithAdminName'
+      responses:
+        '200':
+          description: Rule updated successfully.
+        '404':
+          description: Rule not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ERROR'
+
+  /admins/rules/notify:
+    post:
+      summary: Notify users of the new rules and policies.
+      description: Will send the rules to the gateway for it to send them to the users.
+      operationId: notify_rules
+      responses:
+        '204':
+          description: Successfully sent rules to the gateway
+        '500':
+          description: Failed to reach gateway
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ERROR'
+
+  /admins/courses/enrollments:
+    get:
+      summary: Get user enrollments
+      description: Get all user enrollments of the application
+      operationId: get_all_users_enrollment
+      responses:
+        '200':
+          description: Rule found successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Enrollment'
+        '500':
+          description: Failed to reach users service.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ERROR'
+
+  /admins/courses/{courseId}/enrollments/{uuid}:
+    patch:
+      summary: Updates the role of a user in a course.
+      description: Given course id and user id, update the user's role in a certain course.
+      operationId: update_user_enrollment
+      parameters:
+        - in: path
+          name: courseId
+          required: true
+          description: Id of the user's course.
+          schema:
+            type: string
+            example: "681293f60d3eebd21ae7dad4"
+        - in: path
+          name: uuid
+          required: true
+          description: Id of the user.
+          schema:
+            type: string
+            example: "681293f60d3eebd21ae7dad4"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnrollmentUpdate'
+      responses:
+        '200':
+          description: User role updated successfully.
+        '500':
+          description: Failed to reach education service.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ERROR'
 
 components:
   schemas:
@@ -213,6 +422,134 @@ components:
           type: string
           format: date-time
           example: "2023-10-01T12:00:00Z"
+
+    UserOut:
+      type: object
+      properties:
+        uuid:
+          type: string
+          example: "681293f60d3eebd21ae7dad4"
+        email:
+          type: string
+          example: "user@example.com"
+        name:
+          type: string
+          example: "John"
+        urlProfilePhoto:
+          type: string
+          example: "www.images.com/image/0"
+        description:
+          type: string
+          example: "this is my description"
+        createdAt:
+          type: string
+          example: "2025-05-05"
+        accountLockedByAdmins:
+          type: boolean
+          example: false
+
+    RuleCreate:
+      type: object
+      required:
+        - title
+        - description
+        - effective_date
+        - applicable_conditions
+      properties:
+        title:
+          type: string
+          example: "Privacy Policy"
+        description:
+          type: string
+          example: "All user's data is safely stored"
+        effective_date:
+          type: string
+          example: "2025-05-05"
+        applicable_conditions:
+          type: array
+          items:
+            type: string
+            example: "condition #1"
+
+    RuleUpdateWithAdminName:
+      type: object
+      required:
+        - admin_name
+        - update
+      properties:
+        admin_name:
+          type: string
+          example: "John"
+        update:
+          $ref: '#/components/schemas/RuleUpdate'
+
+    RuleUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          example: "Privacy Policy"
+        description:
+          type: string
+          example: "All user's data is safely stored"
+        effective_date:
+          type: string
+          example: "2025-05-05"
+        applicable_conditions:
+          type: array
+          items:
+            type: string
+            example: "condition #1"
+
+    RuleOut:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "681293f60d3eebd21ae7dad4"
+        title:
+          type: string
+          example: "Privacy Policy"
+        description:
+          type: string
+          example: "All user's data is safely stored"
+        effective_date:
+          type: string
+          example: "2025-05-05"
+        applicable_conditions:
+          type: array
+          items:
+            type: string
+            example: "condition #1"
+
+    Enrollment:
+      type: object
+      properties:
+        role:
+          type: string
+          example: "student"
+        userId:
+          type: string
+          example: "681293f60d3eebd21ae7dad4"
+        course:
+          $ref: '#/components/schemas/Course'
+
+    EnrollmentUpdate:
+      type: object
+      properties:
+        role:
+          type: string
+          example: "assistant"
+
+    Course:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "681293f60d3eebd21ae7dad4"
+        title:
+          type: string
+          example: "CS101"
 
     ERROR:
       type: object
