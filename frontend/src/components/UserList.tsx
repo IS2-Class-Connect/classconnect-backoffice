@@ -46,7 +46,7 @@ const UserList = () => {
 
   const navigate = useNavigate();
   const handleAddRules = () => {
-    navigate('/add-rules'); 
+    navigate('/rules'); 
   };
 
   useEffect(() => {
