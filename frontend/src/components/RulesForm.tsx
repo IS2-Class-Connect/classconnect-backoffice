@@ -27,6 +27,20 @@ const RulesForm = () => {
   });
   const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
 
+  const handleNotifyUsers = async () => {
+    try {
+      const response = await api.post('/admins/rules/notify');
+      if (response.status === 204) {
+        alert('Users have been notified successfully.');
+      } else {
+        alert('Notification request sent, but response was unexpected.');
+      }
+    } catch (error) {
+      console.error('Error notifying users:', error);
+      alert('Error notifying users.');
+    }
+  };
+
   const fetchRules = async () => {
     try {
       const response = await api.get('/admins/rules');
@@ -130,6 +144,14 @@ const RulesForm = () => {
 
   return (
     <div className="user-list-container">
+    <div className="top-actions">
+    <button
+      className="notify-button"
+      onClick={handleNotifyUsers}
+    >
+      Notify Users
+    </button>
+    </div>
       <h2 className="user-list-title">Rules List</h2>
       {rules.length === 0 ? (
         <p>No rules found</p>
