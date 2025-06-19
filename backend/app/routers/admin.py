@@ -54,8 +54,7 @@ class AdminRouter:
         self.router.get("/rules", response_model=list[RuleOut])(self.get_all_rules)
 
         # Protected
-        # dependencies = [Depends(validate_token_with_secret_key(secret_key))]
-        dependencies = []
+        dependencies = [Depends(validate_token_with_secret_key(secret_key))]
         self.router.get(
             "/users",
             response_model=list[UserOut],
