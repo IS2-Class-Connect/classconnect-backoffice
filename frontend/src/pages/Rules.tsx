@@ -3,7 +3,7 @@ import RulesForm from '../components/RulesForm';
 function Rules() {
   return (
     <div>
-      <Rules />
+      <RulesForm />
     </div>
   );
 }
