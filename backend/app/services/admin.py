@@ -128,10 +128,51 @@ class AdminService(Service):
         changes_fmt = "\n".join(changes)
         logging.info(f"{admin_name} made changes to rule id: {id}:\n{changes_fmt}")
 
-    async def _send_to_gateway(
+    async def _send_to_gateway_through_admin_backend(
         self, method: Callable, endpoint: str, **kwargs
     ) -> Response:
-        url = f"{self._gateway_url}/admin-backend{endpoint}"
+        endpoint = f"/admin-backend{endpoint}"
+        return await self._send_to_gateway_directly(method, endpoint, **kwargs)
+
+    @override
+    async def get_all_users(self) -> list[UserOut]:
+        endpoint = "/users"
+        res = await self._send_to_gateway_through_admin_backend(requests.get, endpoint)
+        return [UserOut(**user) for user in res.json()]
+
+    @override
+    async def get_all_users_enrollment(self) -> list[Enrollment]:
+        endpoint = "/courses/enrollments"
+        res = await self._send_to_gateway_through_admin_backend(requests.get, endpoint)
+        return EnrollmentUsers(**res.json()).data
+
+    @override
+    async def update_user_lock_status(self, uuid: str, locked: bool):
+        endpoint = f"/users/{uuid}/lock-status"
+        data = {"locked": locked}
+        await self._send_to_gateway_through_admin_backend(
+            requests.patch, endpoint, json=data
+        )
+        status = "locked" if locked else "unlocked"
+        logging.info(f"{status} user {uuid}")
+
+    @override
+    async def update_user_enrollment(
+        self, courseId: str, uuid: str, enrollmentData: EnrollmentUpdate
+    ):
+        endpoint = f"/courses/{courseId}/enrollments/{uuid}"
+        data = {"role": enrollmentData.role}
+        await self._send_to_gateway_through_admin_backend(
+            requests.patch, endpoint, json=data
+        )
+        logging.info(
+            f"updated role for user {uuid} to {enrollmentData.role} at course {courseId}"
+        )
+
+    async def _send_to_gateway_directly(
+        self, method: Callable, endpoint: str, **kwargs
+    ) -> Response:
+        url = f"{self._gateway_url}{endpoint}"
         headers = {"Authorization": f"Bearer {self._gateway_token}"}
         try:
             res: Response = method(
@@ -145,40 +186,9 @@ class AdminService(Service):
             )
 
     @override
-    async def get_all_users(self) -> list[UserOut]:
-        endpoint = "/users"
-        res = await self._send_to_gateway(requests.get, endpoint)
-        return [UserOut(**user) for user in res.json()]
-
-    @override
-    async def get_all_users_enrollment(self) -> list[Enrollment]:
-        endpoint = "/courses/enrollments"
-        res = await self._send_to_gateway(requests.get, endpoint)
-        return EnrollmentUsers(**res.json()).data
-
-    @override
-    async def update_user_lock_status(self, uuid: str, locked: bool):
-        endpoint = f"/users/{uuid}/lock-status"
-        data = {"locked": locked}
-        await self._send_to_gateway(requests.patch, endpoint, json=data)
-        status = "locked" if locked else "unlocked"
-        logging.info(f"{status} user {uuid}")
-
-    @override
-    async def update_user_enrollment(
-        self, courseId: str, uuid: str, enrollmentData: EnrollmentUpdate
-    ):
-        endpoint = f"/courses/{courseId}/enrollments/{uuid}"
-        data = {"role": enrollmentData.role}
-        await self._send_to_gateway(requests.patch, endpoint, json=data)
-        logging.info(
-            f"updated role for user {uuid} to {enrollmentData.role} at course {courseId}"
-        )
-
-    @override
     async def notify_rules(self):
         rules = await self.get_all_rules()
         endpoint = "/email/rules"
         data = RulePacket(rules=rules).model_dump()
-        await self._send_to_gateway(requests.post, endpoint, json=data)
+        await self._send_to_gateway_directly(requests.post, endpoint, json=data)
         logging.info("sent notification for rules")
