@@ -55,3 +55,29 @@
 .course-entry {
   margin-bottom: 15px;
 }
+
+.user-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.add-rules-button {
+  background-color: #4a90e2;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: uppercase;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.add-rules-button:hover {
+  background-color: #357abd;
+  color: #fff;
+}

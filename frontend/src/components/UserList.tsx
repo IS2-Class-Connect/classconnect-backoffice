@@ -8,7 +8,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Button from '@mui/material/Button';
-
+import { useNavigate } from 'react-router-dom';
 interface Course {
   id: string;
   title: string;
@@ -43,6 +43,11 @@ const UserList = () => {
     onConfirm: () => { },
     onCancel: () => { },
   });
+
+  const navigate = useNavigate();
+  const handleAddRules = () => {
+    navigate('/add-rules'); 
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -164,6 +169,13 @@ const UserList = () => {
 
   return (
     <div>
+    <div className="user-list-header">
+      <h1 className="user-list-title">User Management</h1>
+      <Button className="add-rules-button" onClick={handleAddRules}>
+        Add rules
+      </Button>
+    </div>
+
       <h1>User Management</h1>
 
       <h2>Users</h2>
