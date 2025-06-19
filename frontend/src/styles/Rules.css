@@ -1,0 +1,168 @@
+.user-list-container {
+  font-family: 'Arial', sans-serif;
+  padding: 20px;
+  background-color: #f4f4f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 900px;
+  margin: 0 auto;
+  overflow-x: hidden;
+}
+
+.user-list-title {
+  text-align: center;
+  color: #4a90e2;
+  margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.rules-form input,
+.rules-form textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.rules-form textarea {
+  resize: vertical;
+  min-height: 80px;
+  max-height: 200px;
+}
+
+.top-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.add-rules-button {
+  background-color: #4a90e2;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: uppercase;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.top-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+.notify-button {
+  background-color: #4a90e2;
+  color: #fff;
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.2s ease;
+  font-weight: bold;
+  text-transform: uppercase;
+
+}
+
+.notify-button:hover {
+  background-color: #357abd;
+}
+
+.cancel-button {
+  margin-left: 10px;
+  background-color: #4a90e2;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: uppercase;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.add-rules-button:hover {
+  background-color: #357abd;
+}
+
+.user-list-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.user-list-table th,
+.user-list-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  vertical-align: top;
+}
+
+.user-list-table th {
+  background-color: #4a90e2;
+  color: #fff;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.user-list-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.user-list-table tr:hover {
+  background-color: #e6f7ff;
+  cursor: pointer;
+}
+
+.user-list-table td {
+  color: #555;
+  max-width: 300px;
+  white-space: pre-wrap;
+}
+
+.rule-card {
+  background-color: #fff;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.rule-card h3 {
+  color: #4a90e2;
+  margin-bottom: 8px;
+}
+
+.rule-card p {
+  margin-bottom: 6px;
+  color: #555;
+}
+
+.user-list-table td:last-child {
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  max-width: 250px;
+}
