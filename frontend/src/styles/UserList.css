@@ -56,10 +56,9 @@
   margin-bottom: 15px;
 }
 
-.user-list-header {
+.top-actions {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: flex-end;
   margin-bottom: 20px;
 }
 

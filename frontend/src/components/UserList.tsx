@@ -169,8 +169,7 @@ const UserList = () => {
 
   return (
     <div>
-    <div className="user-list-header">
-      <h1 className="user-list-title">User Management</h1>
+    <div className="top-actions">
       <Button className="add-rules-button" onClick={handleAddRules}>
         Add rules
       </Button>
