@@ -1,4 +1,6 @@
 ---
+layout: page
+title: "Guía del Usuario – Backoffice"
 ---
 
 # 🛠️ Guía del Usuario – Backoffice
