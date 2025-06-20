@@ -1,11 +1,3 @@
----
-layout: default
----
-
-<link rel="stylesheet" href="style.css">
-
-<div class="doc-container">
-
 # 🛠️ Guía del Usuario – Backoffice
 
 ## 📌 Índice
@@ -121,5 +113,3 @@ El backoffice es una herramienta diseñada para que los administradores puedan g
 
 Para consultas técnicas o reportes de errores, contactarse con el equipo de soporte:  
 📧 **[classconnect.team.uba@gmail.com](mailto:classconnect.team.uba@gmail.com)**
-
-</div>
