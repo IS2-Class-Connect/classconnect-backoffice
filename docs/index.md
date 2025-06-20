@@ -71,7 +71,7 @@ El backoffice es una herramienta diseñada para que los administradores puedan g
 
 ### Bloqueo y desbloqueo de usuarios
 
-1. Desde el listado, para cada usuario se podrá utilizar el botón correspondiente para **Bloquear** o **Desbloquear**.  
+1. Desde el listado, para cada usuario se podrá utilizar el botón correspondiente para **Block** o **Unblock**.  
 2. Se mostrará una opción para confirmar los cambios realizados.  
 3. El sistema confirmará que la actualización fue realizada con éxito.
 
