@@ -1,0 +1,50 @@
+body {
+  font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
+  background-color: #f9f9f9;
+  color: #222;
+  max-width: 900px;
+  margin: auto;
+  padding: 2rem;
+  line-height: 1.8;
+}
+
+h1, h2, h3 {
+  color: #003366;
+}
+
+a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+code {
+  background-color: #eee;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+}
+
+ul, ol {
+  padding-left: 1.5rem;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #ccc;
+  margin: 2rem 0;
+}
+
+strong {
+  font-weight: bold;
+}
+
+.markdown-body {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.05);
+}
