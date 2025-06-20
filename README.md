@@ -9,6 +9,7 @@
 - [Getting Started](<README#🚀 Getting Started>)
 - [Project Structure](<README#📁 Project Structure>)
 - [License](<README#✍️ License>)
+- [Github Pages](<README# Github Pages>)
 - [Codecov](README#codecov)
 
 ## 🔧 Features
@@ -123,6 +124,11 @@ classconnect-backoffice/
 ## ✍️ License
 
 MIT License.
+
+## Github Pages
+
+You can access the published backoffice user guide at the following link:
+https://is2-class-connect.github.io/classconnect-backoffice/
 
 ## Codecov
 
