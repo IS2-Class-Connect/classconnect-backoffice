@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 
 # 🛠️ Guía del Usuario – Backoffice
