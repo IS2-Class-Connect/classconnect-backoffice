@@ -4,6 +4,8 @@ layout: default
 
 <link rel="stylesheet" href="style.css">
 
+<div class="doc-container">
+
 # 🛠️ Guía del Usuario – Backoffice
 
 ## 📌 Índice
@@ -27,14 +29,14 @@ El backoffice es una herramienta diseñada para que los administradores puedan g
 
 ### ¿Cómo acceder?
 
-1. Ingresar a la URL del backoffice: `https://classconnect-backoffice.vercel.app/`
-2. Completar los campos de correo electrónico y contraseña.
+1. Ingresar a la URL del backoffice: `https://classconnect-backoffice.vercel.app/`  
+2. Completar los campos de correo electrónico y contraseña.  
 3. Hacer clic en **Iniciar Sesión**.
 
 ### Mensajes posibles
 
-* ✅ **Inicio exitoso:** El sistema redirigirá al panel principal.  
-* ❌ **Error en las credenciales:** Se mostrará un mensaje indicando que los datos ingresados no son válidos.
+- ✅ **Inicio exitoso:** El sistema redirigirá al panel principal.  
+- ❌ **Error en las credenciales:** Se mostrará un mensaje indicando que los datos ingresados no son válidos.
 
 ---
 
@@ -49,9 +51,9 @@ El backoffice es una herramienta diseñada para que los administradores puedan g
 
 ### Resultados esperados
 
-* ✅ **Registro exitoso:** El nuevo administrador podrá acceder al sistema utilizando sus credenciales.  
-* ⚠️ **Datos faltantes o inválidos:** Se indicarán los errores para su corrección.  
-* ❌ **Fallo del servicio:** El sistema informará si no se puede procesar la solicitud.
+- ✅ **Registro exitoso:** El nuevo administrador podrá acceder al sistema utilizando sus credenciales.  
+- ⚠️ **Datos faltantes o inválidos:** Se indicarán los errores para su corrección.  
+- ❌ **Fallo del servicio:** El sistema informará si no se puede procesar la solicitud.
 
 ---
 
@@ -120,3 +122,4 @@ El backoffice es una herramienta diseñada para que los administradores puedan g
 Para consultas técnicas o reportes de errores, contactarse con el equipo de soporte:  
 📧 **[classconnect.team.uba@gmail.com](mailto:classconnect.team.uba@gmail.com)**
 
+</div>
