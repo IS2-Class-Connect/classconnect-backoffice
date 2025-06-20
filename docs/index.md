@@ -90,7 +90,7 @@ El backoffice es una herramienta diseñada para que los administradores puedan g
 ### Creación y modificación de reglas
 
 1. En la página de inicio, estará disponible un botón "Add rules" para acceder a configuración de las reglas.  
-2. Para crear una nueva regla, completar el formulario con todos los datos pedidos y hacer clic en **Add rule**.  
+2. Para crear una nueva regla, completar el formulario con todos los datos pedidos y hacer clic en "Add rule"  
 3. Para editar una existente, seleccionarla del listado, haciendo clic en "Edit".  
 4. Completar o modificar los campos requeridos:
 
