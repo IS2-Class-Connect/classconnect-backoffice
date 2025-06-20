@@ -1,3 +1,6 @@
+---
+---
+
 # 🛠️ Guía del Usuario – Backoffice
 
 ## 📌 Índice
