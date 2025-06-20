@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Guía del Usuario – Backoffice</title>
+<style>
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 2rem 1rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #1a1a1a;
+    line-height: 1.7;
+  }
+
+  h1, h2, h3 {
+    color: #3b0764;
+    font-weight: 700;
+  }
+
+  h1 {
+    font-size: 2.8rem;
+    border-bottom: 4px solid #3b0764;
+    padding-bottom: 0.5em;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  h2 {
+    font-size: 1.9rem;
+    margin-top: 2.5rem;
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  h3 {
+    font-size: 1.3rem;
+    margin-top: 1.8rem;
+    margin-bottom: 0.8rem;
+  }
+
+  ol, ul {
+    padding-left: 1.8rem;
+    margin-bottom: 1.2rem;
+  }
+
+  a {
+    color: #764ba2;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  a:hover {
+    color: #667eea;
+    text-decoration: underline;
+  }
+
+  code {
+    background: #f0f0f0;
+    padding: 3px 7px;
+    border-radius: 5px;
+    font-family: 'Fira Mono', monospace, monospace;
+    font-size: 0.95rem;
+    color: #764ba2;
+  }
+
+  hr {
+    border: none;
+    border-top: 1.5px solid #ddd;
+    margin: 3rem 0;
+  }
+
+  .content-section {
+    background: #fff;
+    padding: 1.8rem 2rem;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(118, 75, 162, 0.2);
+    margin-bottom: 2.5rem;
+  }
+
+  h1 span, h2 span {
+    font-size: 1.8rem;
+  }
+
+  .success {
+    color: #2d8a49;
+    font-weight: 700;
+  }
+
+  .error {
+    color: #bf2e2e;
+    font-weight: 700;
+  }
+
+  ul ul, ol ul {
+    margin-top: 0.4rem;
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 600px) {
+    body {
+      padding: 1rem;
+      margin: 1rem;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+    }
+
+    h2 {
+      font-size: 1.6rem;
+    }
+
+    h3 {
+      font-size: 1.1rem;
+    }
+  }
+</style>
+</head>
+<body>
+
+<h1><span>🛠️</span> Guía del Usuario – Backoffice</h1>
+
+<div class="content-section">
+<h2 id="introducción"><span>📌</span> Índice</h2>
+<ol>
+<li><a href="#introducción">Introducción</a></li>
+<li><a href="#inicio-de-sesión">Inicio de Sesión</a></li>
+<li><a href="#registro-de-administradores">Registro de Administradores</a></li>
+<li><a href="#gestión-de-usuarios-y-permisos">Gestión de Usuarios y Permisos</a></li>
+<li><a href="#configuración-de-reglas-y-normativas">Configuración de Reglas y Normativas</a></li>
+<li><a href="#soporte">Soporte</a></li>
+</ol>
+</div>
+
+<hr />
+
+<div class="content-section">
+<h2 id="introducción"><span>📌</span> Introducción</h2>
+<p>El backoffice es una herramienta diseñada para que los administradores puedan gestionar usuarios, accesos, configuraciones y normativas dentro de la plataforma. Esta guía tiene como objetivo brindar una referencia clara sobre cómo utilizar las principales funcionalidades del sistema.</p>
+</div>
+
+<hr />
+
+<div class="content-section">
+<h2 id="inicio-de-sesión"><span>🔑</span> Inicio de Sesión</h2>
+
+<h3>¿Cómo acceder?</h3>
+<ol>
+  <li>Ingresar a la URL del backoffice: <code>https://classconnect-backoffice.vercel.app/</code></li>
+  <li>Completar los campos de correo electrónico y contraseña.</li>
+  <li>Hacer clic en <strong>Iniciar Sesión</strong>.</li>
+</ol>
+
+<h3>Mensajes posibles</h3>
+<ul>
+  <li><span class="success">✅ Inicio exitoso:</span> El sistema redirigirá al panel principal.</li>
+  <li><span class="error">❌ Error en las credenciales:</span> Se mostrará un mensaje indicando que los datos ingresados no son válidos.</li>
+</ul>
+</div>
+
+<hr />
+
+<div class="content-section">
+<h2 id="registro-de-administradores"><span>📝</span> Registro de Administradores</h2>
+
+<h3>¿Cómo registrar a un nuevo administrador?</h3>
+<ol>
+  <li>Ingresar con una cuenta de administrador.</li>
+  <li>Hacer clic donde dice "Register an Admin here".</li>
+  <li>Completar el formulario con los datos requeridos.</li>
+  <li>Hacer clic en <strong>Register</strong>.</li>
+</ol>
+
+<h3>Resultados esperados</h3>
+<ul>
+  <li><span class="success">✅ Registro exitoso:</span> El nuevo administrador podrá acceder al sistema utilizando sus credenciales.</li>
+  <li><span class="error">⚠️ Datos faltantes o inválidos:</span> Se indicarán los errores para su corrección.</li>
+  <li><span class="error">❌ Fallo del servicio:</span> El sistema informará si no se puede procesar la solicitud.</li>
+</ul>
+</div>
+
+<hr />
+
+<div class="content-section">
+<h2 id="gestión-de-usuarios-y-permisos"><span>👥</span> Gestión de Usuarios y Permisos</h2>
+
+<h3>Visualización del listado de usuarios</h3>
+<ul>
+  <li>En la página de inicio, se mostrará un listado con nombre, rol, estado (activo/bloqueado) y fecha de registro de cada usuario.</li>
+</ul>
+
+<h3>Edición de roles y permisos</h3>
+<ol>
+  <li>Para cada usuario, se visualizará la opción de modificar su rol según corresponda.</li>
+  <li>Se mostrará una opción para confirmar los cambios realizados.</li>
+  <li>El sistema confirmará que la actualización fue realizada con éxito.</li>
+</ol>
+
+<h3>Bloqueo y desbloqueo de usuarios</h3>
+<ol>
+  <li>Desde el listado, para cada usuario se podrá utilizar el botón correspondiente para <strong>Block</strong> o <strong>Unblock</strong>.</li>
+  <li>Se mostrará una opción para confirmar los cambios realizados.</li>
+  <li>El sistema confirmará que la actualización fue realizada con éxito.</li>
+</ol>
+
+<h3>Registro de auditoría</h3>
+<ul>
+  <li>Toda modificación será registrada automáticamente, incluyendo:</li>
+  <ul>
+    <li>Usuario afectado</li>
+    <li>Acción realizada</li>
+    <li>Fecha y hora</li>
+  </ul>
+</ul>
+</div>
+
+<hr />
+
+<div class="content-section">
+<h2 id="configuración-de-reglas-y-normativas"><span>📋</span> Configuración de Reglas y Normativas</h2>
+
+<h3>Creación y modificación de reglas</h3>
+<ol>
+  <li>En la página de inicio, estará disponible un botón "Add rules" para acceder a configuración de las reglas.</li>
+  <li>Para crear una nueva regla, completar el formulario con todos los datos pedidos y hacer clic en "Add rule".</li>
+  <li>Para editar una existente, seleccionarla del listado, haciendo clic en "Edit".</li>
+  <li>Completar o modificar los campos requeridos:
+    <ul>
+      <li>Título</li>
+      <li>Descripción</li>
+      <li>Fecha de vigencia</li>
+      <li>Condiciones de aplicación</li>
+    </ul>
+  </li>
+</ol>
+
+<h3>Validaciones</h3>
+<ul>
+  <li>El sistema validará la integridad de los datos. No será posible guardar reglas con información incompleta.</li>
+</ul>
+
+<h3>Publicación y notificaciones</h3>
+<ul>
+  <li>Una vez guardadas, las normativas se publicarán y se notificará a los usuarios relevantes mediante correo electrónico y/o notificaciones push.</li>
+</ul>
+
+<h3>Registro de cambios</h3>
+<ul>
+  <li>Todas las acciones realizadas quedarán registradas:
+    <ul>
+      <li>Usuario que efectuó el cambio</li>
+      <li>Tipo de modificación</li>
+      <li>Fecha y hora</li>
+    </ul>
+  </li>
+</ul>
+</div>
+
+<hr />
+
+<div class="content-section">
+<h2 id="soporte"><span>📞</span> Soporte</h2>
+<p>Para consultas técnicas o reportes de errores, contactarse con el equipo de soporte:<br />
+📧 <a href="mailto:classconnect.team.uba@gmail.com">classconnect.team.uba@gmail.com</a></p>
+</div>
+
+</body>
+</html>
