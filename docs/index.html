@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Guía del Usuario – Backoffice</title>
+<title>User Guide – Backoffice</title>
 <style>
   *, *::before, *::after {
     box-sizing: border-box;
@@ -130,110 +130,110 @@
 </head>
 <body>
 
-<h1><span>🛠️</span> Guía del Usuario – Backoffice</h1>
+<h1><span>🛠️</span> User Guide – Backoffice</h1>
 
 <div class="content-section">
-<h2 id="introducción"><span>📌</span> Índice</h2>
+<h2 id="introducción"><span>📌</span> Table of Contents</h2>
 <ol>
-<li><a href="#introducción">Introducción</a></li>
-<li><a href="#inicio-de-sesión">Inicio de Sesión</a></li>
-<li><a href="#registro-de-administradores">Registro de Administradores</a></li>
-<li><a href="#gestión-de-usuarios-y-permisos">Gestión de Usuarios y Permisos</a></li>
-<li><a href="#configuración-de-reglas-y-normativas">Configuración de Reglas y Normativas</a></li>
-<li><a href="#soporte">Soporte</a></li>
+<li><a href="#introducción">Introduction</a></li>
+<li><a href="#inicio-de-sesión">Login</a></li>
+<li><a href="#registro-de-administradores">Admin Registration</a></li>
+<li><a href="#gestión-de-usuarios-y-permisos">User and Permissions Management</a></li>
+<li><a href="#configuración-de-reglas-y-normativas">Rules and Policies Configuration</a></li>
+<li><a href="#soporte">Support</a></li>
 </ol>
 </div>
 
 <hr />
 
 <div class="content-section">
-<h2 id="introducción"><span>📌</span> Introducción</h2>
-<p>El backoffice es una herramienta diseñada para que los administradores puedan gestionar usuarios, accesos, configuraciones y normativas dentro de la plataforma. Esta guía tiene como objetivo brindar una referencia clara sobre cómo utilizar las principales funcionalidades del sistema.</p>
+<h2 id="introducción"><span>📌</span> Introduction</h2>
+<p>The backoffice is a tool designed for administrators to manage users, access, configurations, and policies within the platform. This guide aims to provide a clear reference on how to use the main functionalities of the system.</p>
 </div>
 
 <hr />
 
 <div class="content-section">
-<h2 id="inicio-de-sesión"><span>🔑</span> Inicio de Sesión</h2>
+<h2 id="inicio-de-sesión"><span>🔑</span> Login</h2>
 
-<h3>¿Cómo acceder?</h3>
+<h3>How to Access?</h3>
 <ol>
-  <li>Ingresar a la URL del backoffice: <code>https://classconnect-backoffice.vercel.app/</code></li>
+  <li>Go to the backoffice URL: <code>https://classconnect-backoffice.vercel.app/</code></li>
   <img src="images/login.png" style="max-width: 100%; border-radius: 12px; margin: 1rem 0;" />  
-  <li>Completar los campos de correo electrónico y contraseña.</li>
+  <li>Fill in the email and password fields.</li>
   <img src="images/login-data.png" style="max-width: 100%; border-radius: 12px; margin: 1rem 0;" />  
-  <li>Hacer clic en el botón <strong>Login</strong>, marcado en rojo, como se ve en la imágen.</li>
+  <li>Click on the <strong>Login</strong> button, marked in red, as shown in the image.</li>
   <img src="images/login-button.png" style="max-width: 100%; border-radius: 12px; margin: 1rem 0;" />  
 </ol>
 
-<h3>Mensajes posibles</h3>
+<h3>Possible Messages</h3>
 <ul>
-  <li><span class="success">✅ Inicio exitoso:</span> El sistema redirigirá al panel principal.</li>
-  <li><span class="error">❌ Error en las credenciales:</span> Se mostrará un mensaje indicando que los datos ingresados no son válidos.</li>
+  <li><span class="success">✅ Successful Login:</span> The system will redirect to the main dashboard.</li>
+  <li><span class="error">❌ Invalid Credentials:</span> A message will appear indicating that the entered data is incorrect.</li>
 </ul>
 </div>
 
 <hr />
 
 <div class="content-section">
-<h2 id="registro-de-administradores"><span>📝</span> Registro de Administradores</h2>
+<h2 id="registro-de-administradores"><span>📝</span> Admin Registration</h2>
 
-<h3>¿Cómo registrar a un nuevo administrador?</h3>
+<h3>How to Register a New Admin?</h3>
 <ol>
-  <li>Ingresar con una cuenta de administrador.</li>
-  <li>Hacer clic donde dice "Register an Admin here".</li>
+  <li>Log in with an admin account.</li>
+  <li>Click on "Register an Admin here".</li>
   <img src="images/register-admin.png" style="max-width: 100%; border-radius: 12px; margin: 1rem 0;" />
-  <li>Completar el formulario con los datos requeridos.</li>
+  <li>Fill in the form with the required information.</li>
   <img src="images/register-admin-fields.png" style="max-width: 100%; border-radius: 12px; margin: 1rem 0;" />
-  <li>Hacer clic en <strong>Register</strong>, como se ve en la imágen, marcado con rojo.</li>
+  <li>Click on <strong>Register</strong>, as shown in the image, marked in red.</li>
   <img src="images/register-red.png" style="max-width: 100%; border-radius: 12px; margin: 1rem 0;" />
 </ol>
 
-<h3>Resultados esperados</h3>
+<h3>Expected Results</h3>
 <ul>
-  <li><span class="success">✅ Registro exitoso:</span> El nuevo administrador podrá acceder al sistema utilizando sus credenciales.</li>
-  <li><span class="error">⚠️ Datos faltantes o inválidos:</span> Se indicarán los errores para su corrección.</li>
-  <li><span class="error">❌ Fallo del servicio:</span> El sistema informará si no se puede procesar la solicitud.</li>
+  <li><span class="success">✅ Successful Registration:</span> The new admin will be able to log in using their credentials.</li>
+  <li><span class="error">⚠️ Missing or Invalid Data:</span> Errors will be indicated for correction.</li>
+  <li><span class="error">❌ Service Failure:</span> The system will inform if the request cannot be processed.</li>
 </ul>
 </div>
 
 <hr />
 
 <div class="content-section">
-<h2 id="gestión-de-usuarios-y-permisos"><span>👥</span> Gestión de Usuarios y Permisos</h2>
+<h2 id="gestión-de-usuarios-y-permisos"><span>👥</span> User and Permissions Management</h2>
 
-<h3>Visualización del listado de usuarios</h3>
+<h3>Viewing the User List</h3>
 <ul>
-  <li>En la página de inicio, se mostrará un listado con nombre, rol, estado (activo/bloqueado) y fecha de registro de cada usuario.</li>
+  <li>On the homepage, a list of users will be shown, including their name, role, status (active/blocked), and registration date.</li>
 </ul>
 
-<h3>Edición de roles y permisos</h3>
+<h3>Editing Roles and Permissions</h3>
 <ol>
-  <li>Para cada usuario, se visualizará la opción de modificar su rol según corresponda, tocando el botón desplegable que aparece junto al nombre del curso, como se ve en la imágen, marcado con rojo.</li>
+  <li>For each user, the option to modify their role will be visible by clicking the dropdown button next to the course name, as seen in the image, marked in red.</li>
   <img src="images/button-update-role.png" style="max-width: 100%; border-radius: 12px; margin: 1rem 0;" />
-  <li>Se mostrará una opción para confirmar los cambios realizados.</li>
+  <li>A confirmation option will appear for the changes made.</li>
   <img src="images/confirmation-role-msg.png" style="max-width: 100%; border-radius: 12px; margin: 1rem 0;" />
-  <li>El sistema confirmará que la actualización fue realizada con éxito.</li>
+  <li>The system will confirm that the update was successful.</li>
   <img src="images/updated_role.png" style="max-width: 100%; border-radius: 12px; margin: 1rem 0;" />
 </ol>
 
-<h3>Bloqueo y desbloqueo de usuarios</h3>
+<h3>Blocking and Unblocking Users</h3>
 <ol>
-  <li>Desde el listado, para cada usuario se podrá utilizar el botón correspondiente para <strong>Block</strong> o <strong>Unblock</strong>, como se ve en la imágen, marcado con rojo.</li>
+  <li>From the list, each user will have a corresponding button to <strong>Block</strong> or <strong>Unblock</strong>, as seen in the image, marked in red.</li>
   <img src="images/block.png" style="max-width: 100%; border-radius: 12px; margin: 1rem 0;" />
-  <li>Se mostrará una opción para confirmar los cambios realizados.</li>
+  <li>A confirmation option will appear for the changes made.</li>
   <img src="images/confirmation-block-msg.png" style="max-width: 100%; border-radius: 12px; margin: 1rem 0;" />
-  <li>El sistema confirmará que la actualización fue realizada con éxito.</li>
+  <li>The system will confirm that the update was successful.</li>
   <img src="images/blocked_user.png" style="max-width: 100%; border-radius: 12px; margin: 1rem 0;" />
 </ol>
 
-<h3>Registro de auditoría</h3>
+<h3>Audit Log</h3>
 <ul>
-  <li>Toda modificación será registrada automáticamente, incluyendo:</li>
+  <li>All modifications will be automatically logged, including:</li>
   <ul>
-    <li>Usuario afectado</li>
-    <li>Acción realizada</li>
-    <li>Fecha y hora</li>
+    <li>Affected User</li>
+    <li>Action Performed</li>
+    <li>Date and Time</li>
   </ul>
 </ul>
 </div>
@@ -241,46 +241,46 @@
 <hr />
 
 <div class="content-section">
-<h2 id="configuración-de-reglas-y-normativas"><span>📋</span> Configuración de Reglas y Normativas</h2>
+<h2 id="configuración-de-reglas-y-normativas"><span>📋</span> Rules and Policies Configuration</h2>
 
-<h3>Creación y modificación de reglas</h3>
+<h3>Creating and Modifying Rules</h3>
 <ol>
-  <li>En la página de inicio, estará disponible un botón "Add rules" como se ve en la imágen, marcado con rojo, para acceder a configuración de las reglas.</li>
+  <li>On the homepage, there will be an "Add rules" button, as seen in the image, marked in red, to access the rules configuration.</li>
   <img src="images/add-rules-button.png" style="max-width: 100%; border-radius: 12px; margin: 1rem 0;" />
-  <li>Para crear una nueva regla, completar el formulario con todos los datos pedidos y hacer clic en el botón "Add rule" como se ve en la imágen, marcado con rojo.</li>
+  <li>To create a new rule, fill in the form with the required information and click on the "Add rule" button, as seen in the image, marked in red.</li>
   <img src="images/add-rules-form.png" style="max-width: 100%; border-radius: 12px; margin: 1rem 0;" />
-  <li>Para editar una existente, seleccionarla del listado, haciendo clic en el botón "Edit" como se ve en la imágen, marcado con rojo.</li>
+  <li>To edit an existing rule, select it from the list by clicking the "Edit" button, as seen in the image, marked in red.</li>
   <img src="images/edit-rule.png" style="max-width: 100%; border-radius: 12px; margin: 1rem 0;" />
-  <li>Completar o modificar los campos requeridos:
+  <li>Fill in or modify the required fields:
     <ul>
-      <li>Título</li>
-      <li>Descripción</li>
-      <li>Fecha de vigencia</li>
-      <li>Condiciones de aplicación</li>
+      <li>Title</li>
+      <li>Description</li>
+      <li>Effective Date</li>
+      <li>Application Conditions</li>
     </ul>
   </li>
-  <li>Finalmente hacer clic en el botón "Update rule", como se ve en la imágen, marcado con rojo.</li>
+  <li>Finally, click on the "Update rule" button, as seen in the image, marked in red.</li>
   <img src="images/update-rule-button.png" style="max-width: 100%; border-radius: 12px; margin: 1rem 0;" />
 </ol>
 
-<h3>Validaciones</h3>
+<h3>Validations</h3>
 <ul>
-  <li>El sistema validará la integridad de los datos. No será posible guardar reglas con información incompleta.</li>
+  <li>The system will validate the integrity of the data. Incomplete rules cannot be saved.</li>
 </ul>
 
-<h3>Publicación y notificaciones</h3>
+<h3>Publishing and Notifications</h3>
 <ul>
-  <li>Una vez guardadas, las normativas se publicarán y se notificará a los usuarios relevantes mediante correo electrónico y/o notificaciones push al hacer click en el botón "Notify users", como se ve en la imágen, marcado con rojo.</li>
+  <li>Once saved, the rules will be published and relevant users will be notified via email and/or push notifications by clicking the "Notify users" button, as seen in the image, marked in red.</li>
   <img src="images/notify-users.png" style="max-width: 100%; border-radius: 12px; margin: 1rem 0;" />
 </ul>
 
-<h3>Registro de cambios</h3>
+<h3>Change Log</h3>
 <ul>
-  <li>Todas las acciones realizadas quedarán registradas:
+  <li>All actions performed will be logged:
     <ul>
-      <li>Usuario que efectuó el cambio</li>
-      <li>Tipo de modificación</li>
-      <li>Fecha y hora</li>
+      <li>User who made the change</li>
+      <li>Type of modification</li>
+      <li>Date and time</li>
     </ul>
   </li>
 </ul>
@@ -289,8 +289,8 @@
 <hr />
 
 <div class="content-section">
-<h2 id="soporte"><span>📞</span> Soporte</h2>
-<p>Para consultas técnicas o reportes de errores, contactarse con el equipo de soporte:<br />
+<h2 id="soporte"><span>📞</span> Support</h2>
+<p>For technical inquiries or bug reports, contact the support team:<br />
 📧 <a href="mailto:classconnect.team.uba@gmail.com">classconnect.team.uba@gmail.com</a></p>
 </div>
 
